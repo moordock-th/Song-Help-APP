@@ -1,6 +1,6 @@
 # 🎸 Song Akkorde Pro - Mobile App
 
-Eine Progressive Web App (PWA) für Gitarristen zum Anzeigen von Song-Lyrics mit Akkorden und Gitarrengriffen. 
+Superwanze Web App (PWA) für Gitarristen zum Anzeigen von Song-Lyrics mit Akkorden. 
 
 ## ✨ Neue Features
 
