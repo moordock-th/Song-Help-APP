@@ -880,9 +880,7 @@ Eb Refrain D7 hier Bbm7 yeah</textarea>
             output.innerHTML = 'Übersetzung wird geladen...';
             
             try {
-                // Wir nutzen die MyMemory API (öffentlich und kostenlos)
-                // de|en bedeutet: Von Deutsch nach Englisch. 
-                // Wenn du von Englisch nach Deutsch willst, nimm en|de
+                // HINWEIS: await OHNE Punkt schreiben
                 const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|de`);
                 const data = await response.json();
                 
@@ -900,7 +898,7 @@ Eb Refrain D7 hier Bbm7 yeah</textarea>
         function clearTranslation() {
             document.getElementById('sourceText').value = '';
             document.getElementById('translationOutput').innerHTML = 'Deine Übersetzung erscheint hier...';
-        }        
+        }
         // Chord Library
         function populateChordLibrary() {
             const container = document.getElementById('chordLibraryContent');
