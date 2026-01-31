@@ -1,4 +1,4 @@
-const CACHE_NAME = 'song-akkorde-v1';
+const CACHE_NAME = 'song-akkorde-v2';
 const urlsToCache = [
   '/',
   '/index.html',
