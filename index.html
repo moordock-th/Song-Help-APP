@@ -861,31 +861,46 @@ Eb Refrain D7 hier Bbm7 yeah</textarea>
             document.getElementById('status').style.background = '#fff3cd';
             document.getElementById('status').style.borderLeftColor = '#ffc107';
         }
-
-        // Translation Functions
-        function swapLanguages() {
-            const source = document.getElementById('sourceLang');
-            const target = document.getElementById('targetLang');
-            const temp = source.value;
-            source.value = target.value;
-            target.value = temp;
+         // Translation Logic
+        function showTranslate() {
+            hideAll();
+            document.getElementById('translateTab').style.display = 'block';
+            document.getElementById('navTranslate').classList.add('active');
         }
 
-        
-
-        async function simulateTranslation(text, from, to) {
-            // Simulated translation - In production, use actual API
-            // For demo purposes, this returns a placeholder
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        async function translateText() {
+            const text = document.getElementById('sourceText').value;
+            const output = document.getElementById('translationOutput');
             
-            return `[Übersetzung von ${from.toUpperCase()} nach ${to.toUpperCase()}]\n\n${text}\n\n⚠️ Hinweis: Für echte Übersetzungen integriere eine API wie DeepL oder Google Translate.`;
+            if (!text) {
+                output.innerHTML = '<span style="color: var(--danger);">Bitte gib zuerst einen Text ein.</span>';
+                return;
+            }
+            
+            output.innerHTML = 'Übersetzung wird geladen...';
+            
+            try {
+                // Wir nutzen die MyMemory API (öffentlich und kostenlos)
+                // de|en bedeutet: Von Deutsch nach Englisch. 
+                // Wenn du von Englisch nach Deutsch willst, nimm en|de
+                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|de`);
+                const data = await response.json();
+                
+                if(data.responseData && data.responseData.translatedText) {
+                    output.innerHTML = data.responseData.translatedText;
+                } else {
+                    output.innerHTML = "Fehler: Die API konnte den Text nicht übersetzen.";
+                }
+            } catch (error) {
+                output.innerHTML = "Verbindungsfehler: Bitte prüfe deine Internetverbindung.";
+                console.error("Translation Error:", error);
+            }
         }
 
         function clearTranslation() {
             document.getElementById('sourceText').value = '';
             document.getElementById('translationOutput').innerHTML = 'Deine Übersetzung erscheint hier...';
-        }
-
+        }        
         // Chord Library
         function populateChordLibrary() {
             const container = document.getElementById('chordLibraryContent');
