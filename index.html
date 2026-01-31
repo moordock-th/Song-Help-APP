@@ -871,33 +871,7 @@ Eb Refrain D7 hier Bbm7 yeah</textarea>
             target.value = temp;
         }
 
-        async function translateText() {
-            const sourceText = document.getElementById('sourceText').value;
-            const sourceLang = document.getElementById('sourceLang').value;
-            const targetLang = document.getElementById('targetLang').value;
-            const output = document.getElementById('translationOutput');
-            
-            if (!sourceText.trim()) {
-                output.innerHTML = '<div style="color: #856404;">⚠️ Bitte gib Text zum Übersetzen ein!</div>';
-                return;
-            }
-            
-            if (sourceLang === targetLang) {
-                output.innerHTML = '<div style="color: #856404;">⚠️ Quell- und Zielsprache müssen unterschiedlich sein!</div>';
-                return;
-            }
-            
-            output.innerHTML = '<div class="loading"><div class="spinner"></div>Übersetze...</div>';
-            
-            try {
-                // Using a simple translation approach
-                // In production, you'd use a proper API like DeepL or Google Translate
-                const translated = await simulateTranslation(sourceText, sourceLang, targetLang);
-                output.innerHTML = '<div style="line-height: 1.8; font-size: 16px;">' + escapeHtml(translated) + '</div>';
-            } catch (error) {
-                output.innerHTML = '<div style="color: #dc3545;">❌ Fehler bei der Übersetzung. Bitte versuche es erneut.</div>';
-            }
-        }
+        
 
         async function simulateTranslation(text, from, to) {
             // Simulated translation - In production, use actual API
