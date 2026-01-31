@@ -1,4 +1,4 @@
-# 🎸 Song Akkorde Pro - Mobile App
+# 🎸 Song-Help - Mobile App
 
 Superwanze Web App (PWA) für Gitarristen zum Anzeigen von Song-Lyrics mit Akkorden. 
 
