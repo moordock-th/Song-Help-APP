@@ -405,7 +405,7 @@
             .chord-library {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
-        /* Styling für die neuen Eingabefelder im Browser */
+/* Layout für die neuen Eingabefelder */
 .song-meta-input {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -418,8 +418,43 @@
     border: 2px solid #ddd;
     border-radius: 8px;
     font-size: 15px;
+    width: 100%;
 }
 
+/* Anpassung für 3 Buttons nebeneinander */
+.buttons.three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+/* Druck-Layout: Versteckt alles außer den Song-Inhalt beim Drucken */
+.print-header, .chord-legend { display: none; }
+
+@media print {
+    .header, .tabs, .buttons, .info-box, .status, textarea, .install-prompt, .preview-title, .song-meta-input {
+        display: none !important;
+    }
+    body { background: white !important; padding: 0; margin: 0; }
+    .app { max-width: 100%; box-shadow: none; margin: 0; padding: 0; width: 100%; }
+    .tab-content { display: block !important; padding: 0; }
+    .preview { border: none; background: white; padding: 0; margin: 0; }
+    
+    .print-header { 
+        display: block !important; 
+        border-bottom: 2px solid #333;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+    
+    .chord-legend {
+        display: block !important;
+        margin-top: 30px;
+        border-top: 2px solid #ccc;
+        padding-top: 15px;
+        page-break-inside: avoid;
+    }
+}
 /* DRUCK-LOGIK */
 .print-header { display: none; } /* Im Browser unsichtbar */
 
@@ -488,29 +523,32 @@
             <button class="tab" onclick="switchTab('library')">📚 Akkorde</button>
         </div>
 
-      <div class="tab-content active" id="editor">
+     
+<div class="tab-content active" id="editor">
+    <div class="info-box">
+        Geben Sie Ihren Text mit Akkordsymbolen ein (z.B. C, Am, G7).
+    </div>
+
     <div class="song-meta-input">
         <input type="text" id="songKey" placeholder="Tonleiter (z.B. C-Dur)">
         <input type="text" id="songTuning" placeholder="Tuning (z.B. Eb Standard)">
     </div>
 
-    <textarea id="input" placeholder="...">...</textarea>
-
-    <div class="buttons three-col">
-        <button class="btn-success" onclick="showChords()">🎵 Anzeigen</button>
-        <button class="btn-primary" onclick="window.print()">🖨️ Drucken</button> <button class="btn-secondary" onclick="clearAll()">🗑️ Löschen</button>
-    </div>
-    
-    </div>
-            <textarea id="input" placeholder="Gib hier deinen Text mit Akkorden ein...">C Das ist ein Test Am
+    <textarea id="input" placeholder="Gib hier deinen Text mit Akkorden ein...">C Das ist ein Test Am
 Die F# Sonne G scheint C5 hell
 Eb Refrain D7 hier Bbm7 yeah</textarea>
 
-            <div class="buttons">
-                <button class="btn-success" onclick="showChords()">🎵 Akkorde anzeigen</button>
-                <button class="btn-secondary" onclick="clearAll()">🗑️ Löschen</button>
-            </div>
+    <div class="buttons three-col">
+        <button class="btn-success" onclick="showChords()">🎵 Anzeigen</button>
+        <button class="btn-primary" onclick="window.print()">🖨️ Drucken</button> 
+        <button class="btn-secondary" onclick="clearAll()">🗑️ Löschen</button>
+    </div>
 
+    <div class="status" id="status">Bereit! Drücke "Anzeigen"</div>
+
+    <div class="preview-title">Vorschau:</div>
+    <div class="preview" id="output"></div>
+</div>
             <div class="status" id="status">Bereit! Drücke "Akkorde anzeigen"</div>
 
             <div class="preview-title">📋 Vorschau mit Gitarrengriffen</div>
