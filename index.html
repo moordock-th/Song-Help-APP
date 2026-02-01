@@ -4,46 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Song Akkorde">
     <meta name="theme-color" content="#667eea">
     
     <title>Song Lyrics & Akkorde Pro</title>
     
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    
     <style>
         :root {
             --primary: #667eea;
-            --primary-dark: #5568d3;
-            --secondary: #f5576c;
             --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --light: #f8f9fa;
             --dark: #333;
+            --chord-size: 40px;
+            --font-size: 16px;
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #f0f2f5;
-            color: var(--dark);
-            margin: 0;
-            padding: 0;
-            line-height: 1.4;
+            margin: 0; padding: 0;
         }
 
         .app {
-            max-width: 850px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
         .header {
@@ -53,33 +41,28 @@
             text-align: center;
         }
 
-        .tabs {
-            display: flex;
-            background: #eee;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: bold;
-            border-bottom: 3px solid transparent;
-            transition: 0.3s;
-        }
-
-        .tab.active {
-            border-bottom: 3px solid var(--primary);
-            color: var(--primary);
-            background: white;
-        }
+        .tabs { display: flex; background: #eee; position: sticky; top: 0; z-index: 100; }
+        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; }
+        .tab.active { border-bottom: 3px solid var(--primary); color: var(--primary); background: white; }
 
         .content { padding: 15px; flex: 1; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        /* Steuerung für Schriftgrößen */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        .control-group label { font-size: 12px; font-weight: bold; color: #666; }
 
         .song-meta-input {
             display: grid;
@@ -88,114 +71,83 @@
             margin-bottom: 15px;
         }
 
-        .song-meta-input input {
+        .song-meta-input input, textarea {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
-        }
-
-        textarea {
             width: 100%;
-            height: 150px;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 15px;
-            font-family: monospace;
-            margin-bottom: 15px;
         }
 
-        .buttons.three-col {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
+        textarea { height: 120px; font-family: monospace; margin-bottom: 15px; }
 
-        button {
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            color: white;
-            font-size: 13px;
-        }
-
+        .buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        button { padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
         .btn-success { background: var(--success); }
         .btn-primary { background: var(--primary); }
         .btn-secondary { background: #6c757d; }
 
+        /* --- DAS NEUE AKKORD-LAYOUT --- */
         .preview {
+            background: white;
+            padding: 10px;
             border: 1px solid #eee;
-            padding: 15px;
-            background: #fff;
-            border-radius: 6px;
+            border-radius: 4px;
         }
 
-        /* --- KOMPAKTES LAYOUT FÜR ZEILEN --- */
         .line {
-            margin-bottom: 12px; /* Weniger Abstand zwischen den Textzeilen */
-            white-space: pre-wrap;
-            line-height: 2.8; /* Engere Führung von Akkord zu Text */
-            display: block;
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px; /* Abstand zwischen Textzeilen */
+            line-height: 1;
+            padding-top: calc(var(--chord-size) + 15px); /* Platz für Akkorde schaffen */
         }
 
-        .chord-container {
-            display: inline-block;
-            vertical-align: bottom;
-            margin: 0 2px;
-            text-align: center;
-            width: 38px; /* Etwas schmaler im Text */
+        .word-wrapper {
             position: relative;
-            top: -5px; /* Zieht Akkord näher an den Text */
+            margin-right: 6px;
+            display: inline-block;
+        }
+
+        .chord-box {
+            position: absolute;
+            bottom: 100%; /* Positioniert den Akkord direkt ÜBER dem Wort */
+            left: 50%;
+            transform: translateX(-50%);
+            width: var(--chord-size);
+            text-align: center;
+            margin-bottom: 2px;
         }
 
         .chord-name {
             font-weight: bold;
-            font-size: 11px;
+            font-size: calc(var(--chord-size) * 0.3);
             color: var(--primary);
             display: block;
             margin-bottom: 1px;
         }
 
-        .chord-svg { 
-            width: 38px; 
-            height: 48px; 
-            display: block; 
-            margin: 0 auto;
+        .chord-svg {
+            width: var(--chord-size);
+            height: calc(var(--chord-size) * 1.2);
         }
 
-        .word { 
-            font-size: 16px; 
-            display: inline-block; 
-            line-height: 1.2; 
-            vertical-align: bottom;
+        .word-text {
+            font-size: var(--font-size);
+            white-space: nowrap;
         }
 
-        /* Legende am Ende darf groß bleiben */
-        .chord-legend .chord-container {
-            width: 50px;
-            margin: 10px;
-            top: 0;
-        }
-        .chord-legend .chord-svg { width: 50px; height: 60px; }
-        .chord-legend .chord-name { font-size: 14px; }
+        /* Legende am Ende */
+        .chord-legend { margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px; }
+        .chord-legend h3 { margin-bottom: 15px; }
+        .legend-grid { display: flex; flex-wrap: wrap; gap: 15px; }
 
-        /* Druck-Anpassungen */
-        .print-header, .chord-legend { display: none; }
-
+        /* DRUCK-EINSTELLUNGEN */
         @media print {
-            @page { margin: 1.5cm; }
-            .header, .tabs, .buttons, textarea, .song-meta-input, .status, .preview-title { display: none !important; }
-            body { background: white; }
-            .app { box-shadow: none; max-width: 100%; width: 100%; }
-            .content { padding: 0; }
-            .print-header { display: block !important; border-bottom: 2px solid #333; margin-bottom: 15px; padding-bottom: 5px; }
-            .chord-legend { display: block !important; margin-top: 30px; border-top: 1px solid #ccc; padding-top: 15px; }
-            .line { page-break-inside: avoid; margin-bottom: 10px; }
-            .preview { border: none; padding: 0; }
+            @page { margin: 1cm; }
+            .header, .tabs, .controls, .song-meta-input, textarea, .buttons, .status { display: none !important; }
+            .app { box-shadow: none; width: 100%; max-width: 100%; }
+            .preview { border: none; }
+            .line { page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -211,54 +163,63 @@
 
     <div class="content">
         <div id="editor" class="tab-content active">
-            <div class="song-meta-input">
-                <input type="text" id="songKey" placeholder="Tonart (z.B. G-Dur)">
-                <input type="text" id="songTuning" placeholder="Tuning (z.B. Eb Standard)">
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label>Akkord-Größe</label>
+                    <input type="range" id="chordSizeRange" min="30" max="80" value="45" oninput="updateScales()">
+                </div>
+                <div class="control-group">
+                    <label>Text-Größe</label>
+                    <input type="range" id="fontSizeRange" min="12" max="30" value="18" oninput="updateScales()">
+                </div>
             </div>
 
-            <textarea id="input" placeholder="Tippe Lyrics und Akkorde...">G D Em C
-Dies ist eine kompakte Zeile
-G D Cadd9
-Und die Akkorde sitzen nah am Text</textarea>
+            <div class="song-meta-input">
+                <input type="text" id="songKey" placeholder="Song Titel / Tonart">
+                <input type="text" id="songTuning" placeholder="Tuning">
+            </div>
 
-            <div class="buttons three-col">
-                <button class="btn-success" onclick="showChords()">🎵 Anzeigen</button>
+            <textarea id="input" oninput="showChords()">G D Em C
+Dies ist ein Beispiel-Text
+G D C5
+Akkorde schweben nun direkt darüber</textarea>
+
+            <div class="buttons">
+                <button class="btn-success" onclick="showChords()">🎵 Aktualisieren</button>
                 <button class="btn-primary" onclick="window.print()">🖨️ Drucken</button>
                 <button class="btn-secondary" onclick="clearAll()">🗑️ Löschen</button>
             </div>
 
-            <div class="status" id="status" style="text-align:center; font-size:12px; margin-bottom:5px;">Bereit</div>
+            <div id="status" style="text-align:center; font-size:11px; color:#999; margin-bottom:5px;"></div>
             <div class="preview" id="output"></div>
         </div>
 
         <div id="library" class="tab-content">
-            <div id="chordLibraryContent"></div>
+            <div id="chordLibraryContent" class="legend-grid"></div>
         </div>
     </div>
 </div>
 
 <script>
     const chords = {
-        "C": "x32010", "C#": "x46664", "Db": "x46664", "D": "xx0232", "D#": "x68886", "Eb": "x68886", "E": "022100", "F": "133211", "F#": "244322", "Gb": "244322", "G": "320003", "G#": "466544", "Ab": "466544", "A": "x02220", "A#": "x13331", "Bb": "x13331", "B": "x24442",
-        "Cm": "x35543", "C#m": "x46654", "Dbm": "x46654", "Dm": "xx0231", "Ebm": "x68876", "Em": "022000", "Fm": "133111", "F#m": "244222", "Gm": "355333", "G#m": "466444", "Am": "x02210", "Bm": "x24432",
-        "C7": "x32310", "D7": "xx0212", "E7": "020100", "F7": "131211", "G7": "320001", "A7": "x02020", "B7": "x21202",
-        "Cmaj7": "x32000", "Dmaj7": "xx0222", "Emaj7": "021100", "Fmaj7": "x33210", "Gmaj7": "320002", "Amaj7": "x02120",
-        "Cm7": "x35343", "Dm7": "xx0211", "Em7": "020000", "Am7": "x02010", "Bm7": "x20202",
-        "Csus2": "x30033", "Dsus2": "xx0230", "Esus2": "024400", "Fsus2": "x33011", "Gsus2": "300033", "Asus2": "x02200", "Bsus2": "x24422",
-        "Csus4": "x33011", "Dsus4": "xx0233", "Esus4": "022200", "Fsus4": "113311", "Gsus4": "330033", "Asus4": "x02230", "Bsus4": "x24452",
-        "Cadd9": "x32030", "Dadd9": "xx0252", "Eadd9": "024100", "Fadd9": "xx3213", "Gadd9": "320005", "Aadd9": "x02420",
-        "C5": "x355xx", "D5": "x577xx", "E5": "022xxx", "F5": "133xxx", "G5": "355xxx", "A5": "x022xx", "B5": "x244xx"
+        "C": "x32010", "C#": "x46664", "Db": "x46664", "D": "xx0232", "Eb": "x68886", "E": "022100", "F": "133211", "F#": "244322", "Gb": "244322", "G": "320003", "Ab": "466544", "A": "x02220", "Bb": "x13331", "B": "x24442",
+        "Cm": "x35543", "Dm": "xx0231", "Em": "022000", "Fm": "133111", "Gm": "355333", "Am": "x02210", "Bm": "x24432",
+        "C7": "x32310", "D7": "xx0212", "E7": "020100", "G7": "320001", "A7": "x02020",
+        "Csus2": "x30033", "Dsus2": "xx0230", "Asus2": "x02200",
+        "Csus4": "x33011", "Dsus4": "xx0233", "Asus4": "x02230",
+        "Cadd9": "x32030", "Gadd9": "320005",
+        "C5": "x355xx", "D5": "x577xx", "E5": "022xxx", "G5": "355xxx", "A5": "x022xx"
     };
 
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        if (event) event.currentTarget.classList.add('active');
-        if (tabId === 'library') populateLibrary();
+    function updateScales() {
+        const cSize = document.getElementById('chordSizeRange').value;
+        const fSize = document.getElementById('fontSizeRange').value;
+        document.documentElement.style.setProperty('--chord-size', cSize + 'px');
+        document.documentElement.style.setProperty('--font-size', fSize + 'px');
     }
 
-    function makeChordDiagram(name, pattern) {
+    function makeChordSVG(pattern) {
         const frets = pattern.split('');
         let dots = '';
         frets.forEach((fret, i) => {
@@ -267,22 +228,12 @@ Und die Akkorde sitzen nah am Text</textarea>
             }
         });
         return `
-            <div class="chord-container">
-                <span class="chord-name">${name}</span>
-                <svg class="chord-svg" viewBox="0 0 45 60" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="10" width="35" height="40" fill="white" stroke="#333" stroke-width="0.5"/>
-                    ${[10, 18, 26, 34, 42, 50].map(y => `<line x1="5" y1="${y}" x2="40" y2="${y}" stroke="#333" stroke-width="0.5"/>`).join('')}
-                    ${[5, 12, 19, 26, 33, 40].map(x => `<line x1="${x}" y1="10" x2="${x}" y2="50" stroke="#333" stroke-width="0.5"/>`).join('')}
-                    ${dots}
-                </svg>
-            </div>`;
-    }
-
-    function normalizeChord(str) {
-        let n = str.trim();
-        if (!n) return null;
-        let found = Object.keys(chords).find(key => key.toLowerCase() === n.toLowerCase());
-        return found || null;
+            <svg class="chord-svg" viewBox="0 0 45 60" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="10" width="35" height="40" fill="white" stroke="#333" stroke-width="0.5"/>
+                ${[10, 18, 26, 34, 42, 50].map(y => `<line x1="5" y1="${y}" x2="40" y2="${y}" stroke="#333" stroke-width="0.5"/>`).join('')}
+                ${[5, 12, 19, 26, 33, 40].map(x => `<line x1="${x}" y1="10" x2="${x}" y2="50" stroke="#333" stroke-width="0.5"/>`).join('')}
+                ${dots}
+            </svg>`;
     }
 
     function showChords() {
@@ -291,57 +242,79 @@ Und die Akkorde sitzen nah am Text</textarea>
         const key = document.getElementById('songKey').value;
         const tuning = document.getElementById('songTuning').value;
         
-        let html = `<div class="print-header"><h2>${key || 'Song Sheet'}</h2>`;
-        if(tuning) html += `<p style="margin:0; font-size:12px;">Tuning: ${tuning}</p>`;
-        html += `</div>`;
+        let html = '';
+        if(key || tuning) {
+            html += `<div style="border-bottom:2px solid #333; margin-bottom:20px;">`;
+            if(key) html += `<h2 style="margin:0;">${key}</h2>`;
+            if(tuning) html += `<p style="margin:5px 0;">Tuning: ${tuning}</p>`;
+            html += `</div>`;
+        }
 
         let usedChords = new Set();
         const lines = input.split('\n');
 
         lines.forEach(line => {
-            if(line.trim() === "") {
-                html += '<div style="height:15px;"></div>';
-                return;
-            }
             html += '<div class="line">';
-            const segments = line.split(/(\s+)/);
-            segments.forEach(seg => {
-                const normalized = normalizeChord(seg);
-                if (normalized && chords[normalized]) {
-                    html += makeChordDiagram(normalized, chords[normalized]);
+            const words = line.split(/(\s+)/);
+            
+            words.forEach(word => {
+                let clean = word.trim();
+                let normalized = Object.keys(chords).find(k => k.toLowerCase() === clean.toLowerCase());
+
+                if (normalized) {
+                    html += `
+                        <div class="word-wrapper">
+                            <div class="chord-box">
+                                <span class="chord-name">${normalized}</span>
+                                ${makeChordSVG(chords[normalized])}
+                            </div>
+                            <span class="word-text">&nbsp;</span> 
+                        </div>`;
                     usedChords.add(normalized);
+                } else if (word === " ") {
+                    html += '<span>&nbsp;</span>';
                 } else {
-                    html += `<span class="word">${seg}</span>`;
+                    html += `<div class="word-wrapper"><span class="word-text">${word}</span></div>`;
                 }
             });
             html += '</div>';
         });
 
         if (usedChords.size > 0) {
-            html += `<div class="chord-legend"><h3>Akkord-Legende</h3><div style="display:flex; flex-wrap:wrap;">`;
-            Array.from(usedChords).sort().forEach(c => html += makeChordDiagram(c, chords[c]));
+            html += `<div class="chord-legend"><h3>Verwendete Griffe</h3><div class="legend-grid">`;
+            Array.from(usedChords).sort().forEach(c => {
+                html += `<div style="text-align:center;">
+                            <span style="font-weight:bold; display:block;">${c}</span>
+                            ${makeChordSVG(chords[c])}
+                         </div>`;
+            });
             html += `</div></div>`;
         }
         output.innerHTML = html;
+        document.getElementById('status').innerText = usedChords.size + " Akkorde erkannt";
     }
 
-    function populateLibrary() {
-        const lib = document.getElementById('chordLibraryContent');
-        if (lib.innerHTML !== "") return;
-        let html = "<h3>Bibliothek</h3><div style='display:flex; flex-wrap:wrap; gap:5px;'>";
-        Object.keys(chords).sort().forEach(name => {
-            html += makeChordDiagram(name, chords[name]);
-        });
-        lib.innerHTML = html + "</div>";
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        if (event) event.currentTarget.classList.add('active');
+        if (tabId === 'library') {
+            const lib = document.getElementById('chordLibraryContent');
+            lib.innerHTML = Object.keys(chords).sort().map(c => `
+                <div style="text-align:center; padding:10px; border:1px solid #eee;">
+                    <span style="font-weight:bold; display:block;">${c}</span>
+                    ${makeChordSVG(chords[c])}
+                </div>`).join('');
+        }
     }
 
     function clearAll() {
         document.getElementById('input').value = '';
-        document.getElementById('output').innerHTML = '';
-        document.getElementById('songKey').value = '';
-        document.getElementById('songTuning').value = '';
+        showChords();
     }
 
+    updateScales();
     window.onload = showChords;
 </script>
 
