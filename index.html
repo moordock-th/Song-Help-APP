@@ -7,9 +7,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Song Akkorde">
     <meta name="theme-color" content="#667eea">
-    <meta name="description" content="Song Lyrics & Akkorde - Mobile App für Gitarristen">
     
-    <title>Song Lyrics & Akkorde</title>
+    <title>Song Lyrics & Akkorde Pro</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -26,13 +25,10 @@
             --dark: #333;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #f0f2f5;
             color: var(--dark);
             margin: 0;
@@ -55,17 +51,14 @@
             color: white;
             padding: 20px;
             text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
 
         .tabs {
             display: flex;
             background: #eee;
             position: sticky;
-            top: 80px;
-            z-index: 90;
+            top: 0;
+            z-index: 100;
         }
 
         .tab {
@@ -75,7 +68,7 @@
             cursor: pointer;
             font-weight: bold;
             border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+            transition: 0.3s;
         }
 
         .tab.active {
@@ -84,28 +77,10 @@
             background: white;
         }
 
-        .content {
-            padding: 20px;
-            flex: 1;
-        }
+        .content { padding: 20px; flex: 1; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .info-box {
-            background: #e7f3ff;
-            border-left: 5px solid var(--primary);
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-
-        /* NEU: Metadaten Felder */
         .song-meta-input {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -118,29 +93,24 @@
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 15px;
-            width: 100%;
         }
 
         textarea {
             width: 100%;
-            height: 200px;
+            height: 180px;
             padding: 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
             font-family: monospace;
             margin-bottom: 15px;
-            resize: vertical;
-        }
-
-        .buttons {
-            display: grid;
-            gap: 10px;
-            margin-bottom: 20px;
         }
 
         .buttons.three-col {
+            display: grid;
             grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         button {
@@ -149,260 +119,113 @@
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 16px;
-            transition: opacity 0.2s;
+            color: white;
         }
 
-        .btn-success { background-color: var(--success); color: white; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-success { background: var(--success); }
+        .btn-primary { background: var(--primary); }
+        .btn-secondary { background: #6c757d; }
 
         .status {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
             text-align: center;
-        }
-
-        .preview-title {
-            margin: 20px 0 10px;
             font-weight: bold;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
+            margin-bottom: 10px;
+            color: var(--primary);
         }
 
         .preview {
-            border: 2px dashed #ccc;
+            border: 1px solid #eee;
             padding: 20px;
-            border-radius: 8px;
-            min-height: 100px;
             background: #fafafa;
+            border-radius: 8px;
             overflow-x: auto;
         }
 
-        /* Akkord Diagramm Styling */
+        .line {
+            margin-bottom: 30px;
+            white-space: pre-wrap;
+            line-height: 4;
+        }
+
         .chord-container {
             display: inline-block;
             vertical-align: bottom;
             margin: 0 2px;
             text-align: center;
-            min-width: 45px;
+            width: 45px;
         }
 
         .chord-name {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--primary);
             display: block;
+            line-height: 1.2;
             margin-bottom: 2px;
         }
 
-        .chord-svg {
-            width: 45px;
-            height: 55px;
-            display: block;
-        }
+        .chord-svg { width: 45px; height: 55px; display: block; }
 
-        .line {
-            margin-bottom: 25px;
-            white-space: nowrap;
-            line-height: 3.5;
-        }
+        .word { font-size: 18px; display: inline-block; line-height: 1.2; vertical-align: bottom; }
 
-        .word {
-            display: inline-block;
-            margin-right: 4px;
-            font-size: 18px;
-        }
-
-        /* DRUCK LAYOUT */
+        /* Drucken */
         .print-header, .chord-legend { display: none; }
 
         @media print {
-            .header, .tabs, .buttons, .info-box, .status, textarea, .install-prompt, .preview-title, .song-meta-input {
-                display: none !important;
-            }
-            body { background: white !important; }
-            .app { max-width: 100%; box-shadow: none; margin: 0; width: 100%; }
-            .tab-content { display: block !important; padding: 0; }
-            .preview { border: none; background: white; padding: 0; }
-            
-            .print-header { 
-                display: block !important; 
-                border-bottom: 2px solid #333;
-                margin-bottom: 20px;
-                padding-bottom: 10px;
-            }
-            
-            .chord-legend {
-                display: block !important;
-                margin-top: 40px;
-                border-top: 1px solid #ccc;
-                padding-top: 10px;
-                page-break-inside: avoid;
-            }
+            .header, .tabs, .buttons, textarea, .song-meta-input, .status { display: none !important; }
+            .app { box-shadow: none; max-width: 100%; }
+            .print-header { display: block !important; border-bottom: 2px solid #333; margin-bottom: 20px; }
+            .chord-legend { display: block !important; margin-top: 50px; border-top: 1px solid #ccc; }
+            .line { page-break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
-    <div class="app">
-        <div class="header">
-            <h1>🎸 Song Akkorde Pro</h1>
-        </div>
+<div class="app">
+    <div class="header"><h1>🎸 Song Akkorde Pro</h1></div>
 
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('editor')">📝 Editor</div>
-            <div class="tab" onclick="switchTab('library'); populateChordLibrary();">📚 Bibliothek</div>
-        </div>
-
-        <div class="content">
-            <div class="tab-content active" id="editor">
-                <div class="info-box">
-                    Geben Sie Ihren Text mit Akkordsymbolen ein. Die App erstellt automatisch Diagramme.
-                </div>
-
-                <div class="song-meta-input">
-                    <input type="text" id="songKey" placeholder="Tonleiter (z.B. C-Dur)">
-                    <input type="text" id="songTuning" placeholder="Tuning (z.B. E-Standard)">
-                </div>
-
-                <textarea id="input" placeholder="Tipp: C G Am F...">C Am F G</textarea>
-
-                <div class="buttons three-col">
-                    <button class="btn-success" onclick="showChords()">🎵 Anzeigen</button>
-                    <button class="btn-primary" onclick="window.print()">🖨️ Drucken</button>
-                    <button class="btn-secondary" onclick="clearAll()">🗑️ Löschen</button>
-                </div>
-
-                <div class="status" id="status">Bereit!</div>
-
-                <div class="preview-title">Vorschau:</div>
-                <div class="preview" id="output"></div>
-            </div>
-
-            <div class="tab-content" id="library">
-                <h2>Akkord-Referenz</h2>
-                <div id="chordLibraryContent"></div>
-            </div>
-        </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('editor')">Editor</div>
+        <div class="tab" onclick="switchTab('library')">Bibliothek</div>
     </div>
 
-    <script>
-        // Akkord-Datenbank (Auszug)
-        const chords = {
-            "C": "x32010", "Am": "x02210", "F": "133211", "G": "320003", 
-            "Dm": "xx0231", "Em": "022000", "E": "022100", "D": "xx0232",
-            "Bb": "x13331", "Eb": "x68886", "F#": "244322", "G#": "466544",
-            "C#": "x46664", "Ab": "466544", "D7": "xx0212", "G7": "320001"
-            // Ergänze hier bei Bedarf weitere Akkorde
-        };
+    <div class="content">
+        <div id="editor" class="tab-content active">
+            <div class="song-meta-input">
+                <input type="text" id="songKey" placeholder="Tonleiter (z.B. G-Dur)">
+                <input type="text" id="songTuning" placeholder="Tuning (z.B. E-Standard)">
+            </div>
 
-        const chordCategories = {
-            "Basis": ["C", "D", "E", "F", "G", "A", "B"],
-            "Moll": ["Cm", "Dm", "Em", "Fm", "Gm", "Am", "Bm"],
-            "7er": ["C7", "D7", "E7", "G7", "A7"]
-        };
+            <textarea id="input" placeholder="Tippe Lyrics und Akkorde (c, g, am, f, c5)...">g d em c
+Walking down the street
+g d c5
+Rocking my guitar</textarea>
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+            <div class="buttons three-col">
+                <button class="btn-success" onclick="showChords()">🎵 Anzeigen</button>
+                <button class="btn-primary" onclick="window.print()">🖨️ Drucken</button>
+                <button class="btn-secondary" onclick="clearAll()">🗑️ Löschen</button>
+            </div>
 
-        function makeChordDiagram(name, pattern) {
-            const frets = pattern.split('');
-            let dots = '';
-            
-            frets.forEach((fret, stringIndex) => {
-                if (fret !== 'x' && fret !== '0') {
-                    const xPos = 5 + (stringIndex * 7);
-                    const yPos = 5 + (parseInt(fret) * 10);
-                    dots += `<circle cx="${xPos}" cy="${yPos}" r="2.5" fill="black" />`;
-                }
-            });
+            <div class="status" id="status">Bereit</div>
+            <div class="preview" id="output"></div>
+        </div>
 
-            return `
-                <div class="chord-container">
-                    <span class="chord-name">${name}</span>
-                    <svg class="chord-svg" viewBox="0 0 45 60" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="5" y="10" width="35" height="40" fill="white" stroke="#333" stroke-width="0.5"/>
-                        ${[10, 20, 30, 40, 50].map(y => `<line x1="5" y1="${y}" x2="40" y2="${y}" stroke="#333" stroke-width="0.5"/>`).join('')}
-                        ${[5, 12, 19, 26, 33, 40].map(x => `<line x1="${x}" y1="10" x2="${x}" y2="50" stroke="#333" stroke-width="0.5"/>`).join('')}
-                        ${dots}
-                    </svg>
-                </div>`;
-        }
+        <div id="library" class="tab-content">
+            <div id="chordLibraryContent"></div>
+        </div>
+    </div>
+</div>
 
-        function showChords() {
-            const input = document.getElementById('input').value;
-            const output = document.getElementById('output');
-            const key = document.getElementById('songKey').value;
-            const tuning = document.getElementById('songTuning').value;
-            
-            const lines = input.split('\n');
-            let html = '';
-            let usedChords = new Set();
-
-            // Druck-Header
-            html += `<div class="print-header">`;
-            html += `<h1>${key ? 'Tonart: ' + key : 'SongSheet'}</h1>`;
-            if(tuning) html += `<p><strong>Tuning:</strong> ${tuning}</p>`;
-            html += `</div>`;
-
-            lines.forEach(line => {
-                html += '<div class="line">';
-                const words = line.split(/\s+/);
-                words.forEach(word => {
-                    if (word && chords[word]) {
-                        html += makeChordDiagram(word, chords[word]);
-                        usedChords.add(word);
-                    } else if (word) {
-                        html += `<span class="word">${escapeHtml(word)}</span> `;
-                    }
-                });
-                html += '</div>';
-            });
-
-            // Legende
-            if (usedChords.size > 0) {
-                html += `<div class="chord-legend"><h3>Akkord-Legende</h3><div style="display:flex; flex-wrap:wrap; gap:10px;">`;
-                usedChords.forEach(c => html += makeChordDiagram(c, chords[c]));
-                html += `</div></div>`;
-            }
-
-            output.innerHTML = html;
-            document.getElementById('status').innerHTML = "✅ Vorschau aktualisiert!";
-        }
-
-        function clearAll() {
-            document.getElementById('input').value = '';
-            document.getElementById('output').innerHTML = '';
-            document.getElementById('songKey').value = '';
-            document.getElementById('songTuning').value = '';
-        }
-
-        function populateChordLibrary() {
-            const container = document.getElementById('chordLibraryContent');
-            if (container.innerHTML) return;
-            let html = '';
-            for (const [cat, list] of Object.entries(chordCategories)) {
-                html += `<h3>${cat}</h3><div style="display:flex; flex-wrap:wrap; gap:10px;">`;
-                list.forEach(c => { if(chords[c]) html += makeChordDiagram(c, chords[c]); });
-                html += `</div>`;
-            }
-            container.innerHTML = html;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        window.onload = showChords;
-    </script>
-</body>
-</html>
+<script>
+    const chords = {
+        // DUR
+        "C": "x32010", "C#": "x46664", "Db": "x46664", "D": "xx0232", "D#": "x68886", "Eb": "x68886", "E": "022100", "F": "133211", "F#": "244322", "Gb": "244322", "G": "320003", "G#": "466544", "Ab": "466544", "A": "x02220", "A#": "x13331", "Bb": "x13331", "B": "x24442",
+        // MOLL
+        "Cm": "x35543", "C#m": "x46654", "Dbm": "x46654", "Dm": "xx0231", "D#m": "x68876", "Ebm": "x68876", "Em": "022000", "Fm": "133111", "F#m": "244222", "Gbm": "244222", "Gm": "355333", "G#m": "466444", "Abm": "466444", "Am": "x02210", "A#m": "x13321", "Bbm": "x13321", "Bm": "x24432",
+        // 7er & MAJ7
+        "C7": "x32310", "D7": "xx0212", "E7": "020100", "F7": "131211", "G7": "320001", "A7": "x02020", "B7": "x21202",
+        "Cmaj7": "x32000", "Dmaj7": "xx0222", "Emaj7": "021100", "Fmaj7": "x33210", "Gmaj7": "320002", "Amaj7": "x02120",
+        // POWERCHORDS
+        "C5": "x355xx", "C#5
