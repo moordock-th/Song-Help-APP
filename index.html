@@ -1,19 +1,18 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song Akkorde Pro - Kompakt</title>
+    <title>Songblock Pro - Ultimate Chord Edition</title>
     <style>
         :root {
             --primary: #667eea;
             --chord-size: 45px;
             --font-size: 16px;
-            --line-spacing: 1.2;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: #f0f2f5;
             margin: 0; padding: 0;
             color: #333;
@@ -24,27 +23,18 @@
             margin: 0 auto;
             background: white;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            text-align: center;
+            color: white; padding: 15px; text-align: center;
         }
 
         .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            background: #eee;
-            padding: 15px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            background: #eee; padding: 15px; position: sticky; top: 0; z-index: 100;
             border-bottom: 1px solid #ccc;
         }
 
@@ -54,78 +44,40 @@
         .content { padding: 20px; }
 
         textarea {
-            width: 100%;
-            height: 120px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 14px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
+            width: 100%; height: 120px; padding: 10px; border: 1px solid #ccc;
+            border-radius: 4px; font-family: monospace; font-size: 14px; margin-bottom: 15px;
         }
 
         .buttons { display: flex; gap: 10px; margin-bottom: 20px; }
         button { flex: 1; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-success { background: #28a745; }
         .btn-primary { background: var(--primary); }
         .btn-secondary { background: #6c757d; }
 
-        /* --- DER KOMPAKTE TEXTBLOCK --- */
-        .preview {
-            line-height: var(--line-spacing);
-            background: white;
-        }
+        .preview { line-height: 1.2; background: white; }
 
         .line {
-            display: flex;
-            flex-wrap: wrap;
-            /* Der Trick: Genug Platz nach oben für den schwebenden Akkord */
-            padding-top: calc(var(--chord-size) * 1.3); 
-            margin-bottom: 5px;
+            display: flex; flex-wrap: wrap;
+            padding-top: calc(var(--chord-size) * 1.35); 
+            margin-bottom: 8px;
         }
 
-        .word-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-right: 0.3em;
-        }
+        .word-wrapper { position: relative; display: inline-block; margin-right: 0.3em; }
 
         .chord-box {
-            position: absolute;
-            bottom: 100%; /* Schiebt den Akkord über das Wort */
-            left: 0;
-            width: var(--chord-size);
-            margin-bottom: 2px;
-            pointer-events: none;
+            position: absolute; bottom: 100%; left: 0;
+            width: var(--chord-size); margin-bottom: 2px; pointer-events: none;
         }
 
         .chord-name {
-            display: block;
-            font-weight: bold;
+            display: block; font-weight: bold;
             font-size: calc(var(--chord-size) * 0.35);
-            color: var(--primary);
-            text-align: left;
-            margin-bottom: 1px;
+            color: var(--primary); text-align: left; margin-bottom: 1px;
         }
 
-        .chord-svg {
-            width: var(--chord-size);
-            height: auto;
-            display: block;
-        }
+        .chord-svg { width: var(--chord-size); height: auto; display: block; }
+        .word-text { font-size: var(--font-size); white-space: nowrap; }
 
-        .word-text {
-            font-size: var(--font-size);
-            white-space: nowrap;
-        }
-
-        /* Legende am Ende */
-        .chord-legend {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
-        }
+        .chord-legend { margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; }
         .legend-grid { display: flex; flex-wrap: wrap; gap: 15px; }
 
         @media print {
@@ -143,7 +95,7 @@
     <div class="controls">
         <div class="control-group">
             <label>Akkorde (Größe)</label>
-            <input type="range" id="chordSize" min="25" max="70" value="40" oninput="updateLayout()">
+            <input type="range" id="chordSize" min="25" max="75" value="40" oninput="updateLayout()">
         </div>
         <div class="control-group">
             <label>Text (Größe)</label>
@@ -152,11 +104,11 @@
     </div>
 
     <div class="content">
-        <textarea id="input" placeholder="Tippe Text und Akkorde..." oninput="renderSong()">
-G        D        Em       C
-Dies ist ein kompakter Textblock.
-G        D        C5
-Akkorde schweben direkt über den Worten.
+        <textarea id="input" placeholder="Tippe Text... (z.B. gmoll eb g# sus4)" oninput="renderSong()">
+G        D        emoll    C
+Hier kannst du nun gmoll oder
+Eb       G#       asus2    Bmaj7
+Halbtöne und Sus-Akkorde nutzen.
         </textarea>
 
         <div class="buttons">
@@ -169,11 +121,20 @@ Akkorde schweben direkt über den Worten.
 </div>
 
 <script>
-    const chordsDb = {
-        "C": "x32010", "D": "xx0232", "E": "022100", "F": "133211", "G": "320003", "A": "x02220", "B": "x24442",
-        "Cm": "x35543", "Dm": "xx0231", "Em": "022000", "Am": "x02210", "Bm": "x24432",
-        "C7": "x32310", "D7": "xx0212", "G7": "320001", "C5": "x355xx", "G5": "355xxx"
-        // ... (weitere Akkorde können hier wie gewohnt ergänzt werden)
+    // Definition der Griffbilder (Basis-Patterns)
+    const patterns = {
+        // DUR
+        "C": "x32010", "C#": "x46664", "Db": "x46664", "D": "xx0232", "D#": "x68886", "Eb": "x68886", "E": "022100", "F": "133211", "F#": "244322", "Gb": "244322", "G": "320003", "G#": "466544", "Ab": "466544", "A": "x02220", "A#": "x13331", "Bb": "x13331", "B": "x24442",
+        // MOLL
+        "Cm": "x35543", "C#m": "x46654", "Dbm": "x46654", "Dm": "xx0231", "D#m": "x68876", "Ebm": "x68876", "Em": "022000", "Fm": "133111", "F#m": "244222", "Gbm": "244222", "Gm": "355333", "G#m": "466444", "Abm": "466444", "Am": "x02210", "A#m": "x13321", "Bbm": "x13321", "Bm": "x24432",
+        // 7 / MAJ7
+        "C7": "x32310", "D7": "xx0212", "E7": "020100", "G7": "320001", "A7": "x02020", "B7": "x21202",
+        "Cmaj7": "x32000", "Dmaj7": "xx0222", "Emaj7": "021100", "Fmaj7": "x33210", "Gmaj7": "320002", "Amaj7": "x02120", "Bmaj7": "x24342",
+        // SUS2 / SUS4
+        "Csus2": "x30033", "Dsus2": "xx0230", "Esus2": "024400", "Gsus2": "300033", "Asus2": "x02200", "Bsus2": "x24422",
+        "Csus4": "x33011", "Dsus4": "xx0233", "Esus4": "022200", "Fsus4": "113311", "Gsus4": "330033", "Asus4": "x02230", "Bsus4": "x24452",
+        // POWERCHORDS (5)
+        "C5": "x355xx", "C#5": "x466xx", "D5": "x577xx", "Eb5": "x688xx", "E5": "022xxx", "F5": "133xxx", "G5": "355xxx", "A5": "x022xx", "B5": "x244xx"
     };
 
     function updateLayout() {
@@ -181,6 +142,23 @@ Akkorde schweben direkt über den Worten.
         const tSize = document.getElementById('textSize').value;
         document.documentElement.style.setProperty('--chord-size', cSize + 'px');
         document.documentElement.style.setProperty('--font-size', tSize + 'px');
+    }
+
+    // Intelligente Akkord-Erkennung
+    function findChord(input) {
+        if (!input) return null;
+        let clean = input.trim().toLowerCase();
+        
+        // Ersetze gängige Schreibweisen
+        clean = clean.replace(/moll/g, 'm').replace(/min/g, 'm');
+        
+        // Mappe Eingabe auf Datenbank-Keys (Case Insensitive)
+        let match = Object.keys(patterns).find(key => key.toLowerCase() === clean);
+        if (match) return match;
+
+        // Spezialfall: Nur Halbtöne (z.B. eb -> Eb)
+        let noteMatch = Object.keys(patterns).find(key => key.toLowerCase() === clean);
+        return noteMatch || null;
     }
 
     function createSvg(pattern) {
@@ -202,21 +180,17 @@ Akkorde schweben direkt über den Worten.
         let used = new Set();
 
         lines.forEach(line => {
-            if (!line.trim()) { html += '<div style="height:1em"></div>'; return; }
+            if (!line.trim()) { html += '<div style="height:1.2em"></div>'; return; }
             html += '<div class="line">';
-            
-            // Wir splitten nach Worten, behalten aber die Leerzeichen für die Positionierung
             const segments = line.split(/(\s+)/);
             
             segments.forEach(seg => {
-                let clean = seg.trim();
-                let chordMatch = Object.keys(chordsDb).find(k => k.toLowerCase() === clean.toLowerCase());
-
+                let chordMatch = findChord(seg);
                 if (chordMatch) {
                     html += `<div class="word-wrapper">
                                 <div class="chord-box">
                                     <span class="chord-name">${chordMatch}</span>
-                                    ${createSvg(chordsDb[chordMatch])}
+                                    ${createSvg(patterns[chordMatch])}
                                 </div>
                                 <span class="word-text">&nbsp;&nbsp;</span>
                              </div>`;
@@ -231,7 +205,7 @@ Akkorde schweben direkt über den Worten.
         if (used.size > 0) {
             html += `<div class="chord-legend"><h3>Griffe in diesem Song</h3><div class="legend-grid">`;
             Array.from(used).sort().forEach(c => {
-                html += `<div style="text-align:center;"><span class="chord-name">${c}</span>${createSvg(chordsDb[c])}</div>`;
+                html += `<div style="text-align:center;"><span class="chord-name">${c}</span>${createSvg(patterns[c])}</div>`;
             });
             html += `</div></div>`;
         }
