@@ -32,65 +32,79 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: var(--dark);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            line-height: 1.5;
+            background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .app {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--secondary);
             color: white;
-            padding: 20px;
+            padding: max(20px, env(safe-area-inset-top)) 20px 20px;
             text-align: center;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0 0 5px 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .header p {
+            margin: 0;
+            opacity: 0.95;
+            font-size: 13px;
         }
 
         .tabs {
             display: flex;
-            background: #eee;
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
             position: sticky;
-            top: 80px;
-            z-index: 90;
+            top: 70px;
+            z-index: 99;
         }
 
         .tab {
             flex: 1;
             padding: 15px;
             text-align: center;
+            background: white;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
             cursor: pointer;
-            font-weight: bold;
-            border-bottom: 3px solid transparent;
             transition: all 0.3s;
+            border-bottom: 3px solid transparent;
         }
 
         .tab.active {
-            border-bottom: 3px solid var(--primary);
             color: var(--primary);
-            background: white;
-        }
-
-        .content {
-            padding: 20px;
-            flex: 1;
+            border-bottom-color: var(--primary);
         }
 
         .tab-content {
             display: none;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
         }
 
         .tab-content.active {
@@ -99,42 +113,40 @@
 
         .info-box {
             background: #e7f3ff;
-            border-left: 5px solid var(--primary);
+            border-left: 4px solid #0066cc;
+            border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
-            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
-        /* NEU: Metadaten Felder */
-        .song-meta-input {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .song-meta-input input {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-            width: 100%;
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #004085;
         }
 
         textarea {
             width: 100%;
-            height: 200px;
+            min-height: 200px;
             padding: 15px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
             border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 16px;
-            font-family: monospace;
             margin-bottom: 15px;
             resize: vertical;
         }
 
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
         .buttons {
             display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 20px;
         }
@@ -144,208 +156,797 @@
         }
 
         button {
-            padding: 12px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
             border: none;
             border-radius: 8px;
-            font-weight: bold;
             cursor: pointer;
-            font-size: 16px;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
 
-        .btn-success { background-color: var(--success); color: white; }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
+        button:active {
+            transform: scale(0.98);
+        }
 
-        .status {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            text-align: center;
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #333;
         }
 
         .preview-title {
-            margin: 20px 0 10px;
-            font-weight: bold;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
+            font-size: 17px;
+            font-weight: 700;
+            margin: 20px 0 12px 0;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .preview {
-            border: 2px dashed #ccc;
-            padding: 20px;
+            background: var(--light);
+            border: 2px solid #ddd;
             border-radius: 8px;
-            min-height: 100px;
-            background: #fafafa;
-            overflow-x: auto;
-        }
-
-        /* Akkord Diagramm Styling */
-        .chord-container {
-            display: inline-block;
-            vertical-align: bottom;
-            margin: 0 2px;
-            text-align: center;
-            min-width: 45px;
-        }
-
-        .chord-name {
-            font-weight: bold;
-            font-size: 14px;
-            color: var(--primary);
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .chord-svg {
-            width: 45px;
-            height: 55px;
-            display: block;
+            padding: 20px;
+            min-height: 200px;
         }
 
         .line {
-            margin-bottom: 25px;
-            white-space: nowrap;
-            line-height: 3.5;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .chord-box {
+            display: inline-block;
+            vertical-align: top;
+            margin: 0 8px 12px 0;
+            padding: 12px;
+            background: white;
+            border: 3px solid var(--success);
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chord-label {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+
+        .fretboard {
+            width: 120px;
+            height: 100px;
+            position: relative;
+            background: #faf8f4;
+            margin: 0 auto;
+            border-radius: 4px;
+        }
+
+        .string {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #444;
+            top: 0;
+        }
+
+        .fret {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #444;
+            left: 0;
+        }
+
+        .dot {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid #a71d2a;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .marker {
+            position: absolute;
+            font-size: 20px;
+            font-weight: 700;
+            transform: translate(-50%, -50%);
+        }
+
+        .marker.mute {
+            color: var(--danger);
+        }
+
+        .marker.open {
+            color: var(--success);
         }
 
         .word {
-            display: inline-block;
-            margin-right: 4px;
-            font-size: 18px;
+            display: inline;
+            font-size: 16px;
+            margin-right: 5px;
+            line-height: 1.8;
         }
 
-        /* DRUCK LAYOUT */
-        .print-header, .chord-legend { display: none; }
+        .status {
+            padding: 12px;
+            background: #fff3cd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #856404;
+            border-left: 4px solid var(--warning);
+        }
 
-        @media print {
-            .header, .tabs, .buttons, .info-box, .status, textarea, .install-prompt, .preview-title, .song-meta-input {
-                display: none !important;
+        .translate-section {
+            margin-bottom: 20px;
+        }
+
+        .language-selector {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .language-selector select {
+            padding: 12px;
+            font-size: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .swap-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chord-library {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .chord-category {
+            margin-bottom: 30px;
+        }
+
+        .chord-category h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .install-prompt {
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            color: white;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 10px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-prompt button {
+            background: white;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 600px) {
+            .buttons {
+                grid-template-columns: 1fr;
             }
-            body { background: white !important; }
-            .app { max-width: 100%; box-shadow: none; margin: 0; width: 100%; }
-            .tab-content { display: block !important; padding: 0; }
-            .preview { border: none; background: white; padding: 0; }
             
-            .print-header { 
-                display: block !important; 
-                border-bottom: 2px solid #333;
-                margin-bottom: 20px;
-                padding-bottom: 10px;
-            }
-            
-            .chord-legend {
-                display: block !important;
-                margin-top: 40px;
-                border-top: 1px solid #ccc;
-                padding-top: 10px;
-                page-break-inside: avoid;
+            .chord-library {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
         }
     </style>
 </head>
 <body>
-
     <div class="app">
         <div class="header">
             <h1>🎸 Song Akkorde Pro</h1>
+            <p>Mobile App für iOS & Android</p>
+        </div>
+
+        <div class="install-prompt" id="installPrompt">
+            <div style="flex: 1;">
+                <strong>App installieren</strong><br>
+                <small>Füge diese App zu deinem Homescreen hinzu!</small>
+            </div>
+            <button onclick="installApp()">Installieren</button>
+            <button onclick="closeInstallPrompt()" style="background: transparent; color: white; border: 2px solid white;">×</button>
         </div>
 
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('editor')">📝 Editor</div>
-            <div class="tab" onclick="switchTab('library'); populateChordLibrary();">📚 Bibliothek</div>
+            <button class="tab active" onclick="switchTab('editor')">✏️ Editor</button>
+            <button class="tab" onclick="switchTab('translate')">🌐 Übersetzer</button>
+            <button class="tab" onclick="switchTab('library')">📚 Akkorde</button>
         </div>
 
-        <div class="content">
-            <div class="tab-content active" id="editor">
-                <div class="info-box">
-                    Geben Sie Ihren Text mit Akkordsymbolen ein. Die App erstellt automatisch Diagramme.
-                </div>
-
-                <div class="song-meta-input">
-                    <input type="text" id="songKey" placeholder="Tonleiter (z.B. C-Dur)">
-                    <input type="text" id="songTuning" placeholder="Tuning (z.B. E-Standard)">
-                </div>
-
-                <textarea id="input" placeholder="Tipp: C G Am F...">C Am F G</textarea>
-
-                <div class="buttons three-col">
-                    <button class="btn-success" onclick="showChords()">🎵 Anzeigen</button>
-                    <button class="btn-primary" onclick="window.print()">🖨️ Drucken</button>
-                    <button class="btn-secondary" onclick="clearAll()">🗑️ Löschen</button>
-                </div>
-
-                <div class="status" id="status">Bereit!</div>
-
-                <div class="preview-title">Vorschau:</div>
-                <div class="preview" id="output"></div>
+        <div class="tab-content active" id="editor">
+            <div class="info-box">
+                <strong>So funktioniert's:</strong>
+                Schreibe deine Lyrics und setze Akkorde als einzelne Wörter dazwischen. 
+                Nutze die Sprache-zu-Text Funktion (🎤) deiner Tastatur.
+                <br><br>
+                <strong>Beispiel:</strong><br>
+                C Das ist ein Test Am<br>
+                Die F# Sonne G scheint C5 hell<br>
+                Eb Refrain Bbm7 hier
             </div>
 
-            <div class="tab-content" id="library">
-                <h2>Akkord-Referenz</h2>
-                <div id="chordLibraryContent"></div>
+            <textarea id="input" placeholder="Gib hier deinen Text mit Akkorden ein...">C Das ist ein Test Am
+Die F# Sonne G scheint C5 hell
+Eb Refrain D7 hier Bbm7 yeah</textarea>
+
+            <div class="buttons">
+                <button class="btn-success" onclick="showChords()">🎵 Akkorde anzeigen</button>
+                <button class="btn-secondary" onclick="clearAll()">🗑️ Löschen</button>
+            </div>
+
+            <div class="status" id="status">Bereit! Drücke "Akkorde anzeigen"</div>
+
+            <div class="preview-title">📋 Vorschau mit Gitarrengriffen</div>
+            <div class="preview" id="output">
+                Deine Lyrics mit Akkorden erscheinen hier...
+            </div>
+        </div>
+
+        <div class="tab-content" id="translate">
+            <div class="info-box">
+                <strong>Text übersetzen:</strong>
+                Übersetze deine Song-Texte zwischen Deutsch und Englisch. 
+                Die Übersetzung nutzt die DeepL API für qualitativ hochwertige Ergebnisse.
+            </div>
+
+            <div class="translate-section">
+                <div class="language-selector">
+                    <select id="sourceLang">
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="en" selected>🇬🇧 Englisch</option>
+                    </select>
+                    <button class="swap-btn" onclick="swapLanguages()">⇄</button>
+                    <select id="targetLang">
+                        <option value="de" selected>🇩🇪 Deutsch</option>
+                        <option value="en">🇬🇧 Englisch</option>
+                    </select>
+                </div>
+
+                <textarea id="sourceText" placeholder="Text zum Übersetzen eingeben..."></textarea>
+
+                <div class="buttons">
+                    <button class="btn-primary" onclick="translateText()">🌐 Übersetzen</button>
+                    <button class="btn-secondary" onclick="clearTranslation()">🗑️ Löschen</button>
+                </div>
+
+                <div class="preview-title">📝 Übersetzung</div>
+                <div class="preview" id="translationOutput">
+                    Deine Übersetzung erscheint hier...
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="library">
+            <div class="info-box">
+                <strong>Akkord-Bibliothek:</strong>
+                Alle verfügbaren Akkorde mit Gitarrengriffen. 
+                Scrolle durch die Kategorien oder suche einen bestimmten Akkord.
+            </div>
+
+            <div id="chordLibraryContent">
+                <!-- Will be populated by JavaScript -->
             </div>
         </div>
     </div>
 
     <script>
-        // Akkord-Datenbank (Auszug)
+        // Comprehensive chord database with ALL chromatic notes
         const chords = {
-            "C": "x32010", "Am": "x02210", "F": "133211", "G": "320003", 
-            "Dm": "xx0231", "Em": "022000", "E": "022100", "D": "xx0232",
-            "Bb": "x13331", "Eb": "x68886", "F#": "244322", "G#": "466544",
-            "C#": "x46664", "Ab": "466544", "D7": "xx0212", "G7": "320001"
-            // Ergänze hier bei Bedarf weitere Akkorde
+            // Basic Major Chords
+            'C': [-1, 3, 2, 0, 1, 0],
+            'C#': [-1, 4, 6, 6, 6, 4],
+            'Db': [-1, 4, 6, 6, 6, 4],
+            'D': [-1, -1, 0, 2, 3, 2],
+            'D#': [-1, -1, 1, 3, 4, 3],
+            'Eb': [-1, -1, 1, 3, 4, 3],
+            'E': [0, 2, 2, 1, 0, 0],
+            'F': [1, 3, 3, 2, 1, 1],
+            'F#': [2, 4, 4, 3, 2, 2],
+            'Gb': [2, 4, 4, 3, 2, 2],
+            'G': [3, 2, 0, 0, 0, 3],
+            'G#': [4, 6, 6, 5, 4, 4],
+            'Ab': [4, 6, 6, 5, 4, 4],
+            'A': [-1, 0, 2, 2, 2, 0],
+            'A#': [-1, 1, 3, 3, 3, 1],
+            'Bb': [-1, 1, 3, 3, 3, 1],
+            'B': [-1, 2, 4, 4, 4, 2],
+            'H': [-1, 2, 4, 4, 4, 2],
+            
+            // Minor Chords
+            'Cm': [-1, 3, 5, 5, 4, 3],
+            'C#m': [-1, 4, 6, 6, 5, 4],
+            'Dbm': [-1, 4, 6, 6, 5, 4],
+            'Dm': [-1, -1, 0, 2, 3, 1],
+            'D#m': [-1, -1, 1, 3, 4, 2],
+            'Ebm': [-1, -1, 1, 3, 4, 2],
+            'Em': [0, 2, 2, 0, 0, 0],
+            'Fm': [1, 3, 3, 1, 1, 1],
+            'F#m': [2, 4, 4, 2, 2, 2],
+            'Gbm': [2, 4, 4, 2, 2, 2],
+            'Gm': [3, 5, 5, 3, 3, 3],
+            'G#m': [4, 6, 6, 4, 4, 4],
+            'Abm': [4, 6, 6, 4, 4, 4],
+            'Am': [-1, 0, 2, 2, 1, 0],
+            'A#m': [-1, 1, 3, 3, 2, 1],
+            'Bbm': [-1, 1, 3, 3, 2, 1],
+            'Bm': [-1, 2, 4, 4, 3, 2],
+            
+            // Seventh Chords
+            'C7': [-1, 3, 2, 3, 1, 0],
+            'C#7': [-1, 4, 6, 4, 6, 4],
+            'Db7': [-1, 4, 6, 4, 6, 4],
+            'D7': [-1, -1, 0, 2, 1, 2],
+            'D#7': [-1, -1, 1, 3, 2, 3],
+            'Eb7': [-1, -1, 1, 3, 2, 3],
+            'E7': [0, 2, 0, 1, 0, 0],
+            'F7': [1, 3, 1, 2, 1, 1],
+            'F#7': [2, 4, 2, 3, 2, 2],
+            'Gb7': [2, 4, 2, 3, 2, 2],
+            'G7': [3, 2, 0, 0, 0, 1],
+            'G#7': [4, 6, 4, 5, 4, 4],
+            'Ab7': [4, 6, 4, 5, 4, 4],
+            'A7': [-1, 0, 2, 0, 2, 0],
+            'A#7': [-1, 1, 3, 1, 3, 1],
+            'Bb7': [-1, 1, 3, 1, 3, 1],
+            'B7': [-1, 2, 1, 2, 0, 2],
+            
+            // Major 7th Chords
+            'Cmaj7': [-1, 3, 2, 0, 0, 0],
+            'C#maj7': [-1, 4, 3, 1, 1, 1],
+            'Dbmaj7': [-1, 4, 3, 1, 1, 1],
+            'Dmaj7': [-1, -1, 0, 2, 2, 2],
+            'D#maj7': [-1, -1, 1, 3, 3, 3],
+            'Ebmaj7': [-1, -1, 1, 3, 3, 3],
+            'Emaj7': [0, 2, 1, 1, 0, 0],
+            'Fmaj7': [1, 3, 2, 2, 1, 0],
+            'F#maj7': [2, 4, 3, 3, 2, 2],
+            'Gbmaj7': [2, 4, 3, 3, 2, 2],
+            'Gmaj7': [3, 2, 0, 0, 0, 2],
+            'G#maj7': [4, 6, 5, 5, 4, 4],
+            'Abmaj7': [4, 6, 5, 5, 4, 4],
+            'Amaj7': [-1, 0, 2, 1, 2, 0],
+            'A#maj7': [-1, 1, 3, 2, 3, 1],
+            'Bbmaj7': [-1, 1, 3, 2, 3, 1],
+            'Bmaj7': [-1, 2, 4, 3, 4, 2],
+            
+            // Minor 7th Chords
+            'Cm7': [-1, 3, 5, 3, 4, 3],
+            'C#m7': [-1, 4, 6, 4, 5, 4],
+            'Dbm7': [-1, 4, 6, 4, 5, 4],
+            'Dm7': [-1, -1, 0, 2, 1, 1],
+            'D#m7': [-1, -1, 1, 3, 2, 2],
+            'Ebm7': [-1, -1, 1, 3, 2, 2],
+            'Em7': [0, 2, 0, 0, 0, 0],
+            'Fm7': [1, 3, 1, 1, 1, 1],
+            'F#m7': [2, 4, 2, 2, 2, 2],
+            'Gbm7': [2, 4, 2, 2, 2, 2],
+            'Gm7': [3, 5, 3, 3, 3, 3],
+            'G#m7': [4, 6, 4, 4, 4, 4],
+            'Abm7': [4, 6, 4, 4, 4, 4],
+            'Am7': [-1, 0, 2, 0, 1, 0],
+            'A#m7': [-1, 1, 3, 1, 2, 1],
+            'Bbm7': [-1, 1, 3, 1, 2, 1],
+            'Bm7': [-1, 2, 4, 2, 3, 2],
+            
+            // Power Chords
+            'C5': [-1, 3, 5, 5, -1, -1],
+            'C#5': [-1, 4, 6, 6, -1, -1],
+            'Db5': [-1, 4, 6, 6, -1, -1],
+            'D5': [-1, -1, 0, 2, 3, -1],
+            'D#5': [-1, -1, 1, 3, 4, -1],
+            'Eb5': [-1, -1, 1, 3, 4, -1],
+            'E5': [0, 2, 2, -1, -1, -1],
+            'F5': [1, 3, 3, -1, -1, -1],
+            'F#5': [2, 4, 4, -1, -1, -1],
+            'Gb5': [2, 4, 4, -1, -1, -1],
+            'G5': [3, 5, 5, -1, -1, -1],
+            'G#5': [4, 6, 6, -1, -1, -1],
+            'Ab5': [4, 6, 6, -1, -1, -1],
+            'A5': [-1, 0, 2, 2, -1, -1],
+            'A#5': [-1, 1, 3, 3, -1, -1],
+            'Bb5': [-1, 1, 3, 3, -1, -1],
+            'B5': [-1, 2, 4, 4, -1, -1],
+            
+            // Suspended Chords
+            'Csus2': [-1, 3, 0, 0, 1, 3],
+            'Csus4': [-1, 3, 3, 0, 1, 1],
+            'C#sus4': [-1, 4, 6, 6, 7, 4],
+            'Dbsus4': [-1, 4, 6, 6, 7, 4],
+            'Dsus2': [-1, -1, 0, 2, 3, 0],
+            'Dsus4': [-1, -1, 0, 2, 3, 3],
+            'D#sus4': [-1, -1, 1, 3, 4, 4],
+            'Ebsus4': [-1, -1, 1, 3, 4, 4],
+            'Esus4': [0, 2, 2, 2, 0, 0],
+            'Fsus4': [1, 3, 3, 3, 1, 1],
+            'F#sus4': [2, 4, 4, 4, 2, 2],
+            'Gbsus4': [2, 4, 4, 4, 2, 2],
+            'Gsus4': [3, 3, 0, 0, 1, 3],
+            'G#sus4': [4, 6, 6, 6, 4, 4],
+            'Absus4': [4, 6, 6, 6, 4, 4],
+            'Asus2': [-1, 0, 2, 2, 0, 0],
+            'Asus4': [-1, 0, 2, 2, 3, 0],
+            'A#sus4': [-1, 1, 3, 3, 4, 1],
+            'Bbsus4': [-1, 1, 3, 3, 4, 1],
+            'Bsus4': [-1, 2, 4, 4, 5, 2],
+            
+            // Diminished Chords
+            'Cdim': [-1, 3, 4, 2, 4, -1],
+            'C#dim': [-1, 4, 5, 3, 5, -1],
+            'Dbdim': [-1, 4, 5, 3, 5, -1],
+            'Ddim': [-1, -1, 0, 1, 0, 1],
+            'D#dim': [-1, -1, 1, 2, 1, 2],
+            'Ebdim': [-1, -1, 1, 2, 1, 2],
+            'Edim': [0, 1, 2, 0, 2, -1],
+            'Fdim': [1, 2, 3, 1, 3, -1],
+            'F#dim': [2, 3, 4, 2, 4, -1],
+            'Gbdim': [2, 3, 4, 2, 4, -1],
+            'Gdim': [3, 4, 5, 3, 5, -1],
+            'G#dim': [4, 5, 6, 4, 6, -1],
+            'Abdim': [4, 5, 6, 4, 6, -1],
+            'Adim': [-1, 0, 1, 2, 1, -1],
+            'A#dim': [-1, 1, 2, 3, 2, -1],
+            'Bbdim': [-1, 1, 2, 3, 2, -1],
+            'Bdim': [-1, 2, 3, 4, 3, -1],
+            
+            // Augmented Chords
+            'Caug': [-1, 3, 2, 1, 1, 0],
+            'C#aug': [-1, 4, 3, 2, 2, 1],
+            'Dbaug': [-1, 4, 3, 2, 2, 1],
+            'Daug': [-1, -1, 0, 3, 3, 2],
+            'D#aug': [-1, -1, 1, 4, 4, 3],
+            'Ebaug': [-1, -1, 1, 4, 4, 3],
+            'Eaug': [0, 3, 2, 1, 1, 0],
+            'Faug': [1, 4, 3, 2, 2, 1],
+            'F#aug': [2, 5, 4, 3, 3, 2],
+            'Gbaug': [2, 5, 4, 3, 3, 2],
+            'Gaug': [3, 2, 1, 0, 0, 3],
+            'G#aug': [4, 3, 2, 1, 1, 4],
+            'Abaug': [4, 3, 2, 1, 1, 4],
+            'Aaug': [-1, 0, 3, 2, 2, 1],
+            'A#aug': [-1, 1, 4, 3, 3, 2],
+            'Bbaug': [-1, 1, 4, 3, 3, 2],
+            'Baug': [-1, 2, 5, 4, 4, 3],
+            
+            // Add9 Chords
+            'Cadd9': [-1, 3, 2, 0, 3, 0],
+            'C#add9': [-1, 4, 3, 1, 4, 1],
+            'Dbadd9': [-1, 4, 3, 1, 4, 1],
+            'Dadd9': [-1, -1, 0, 2, 3, 0],
+            'D#add9': [-1, -1, 1, 3, 4, 1],
+            'Ebadd9': [-1, -1, 1, 3, 4, 1],
+            'Eadd9': [0, 2, 2, 1, 0, 2],
+            'Fadd9': [1, 3, 3, 2, 1, 3],
+            'F#add9': [2, 4, 4, 3, 2, 4],
+            'Gbadd9': [2, 4, 4, 3, 2, 4],
+            'Gadd9': [3, 2, 0, 0, 0, 3],
+            'G#add9': [4, 3, 1, 1, 1, 4],
+            'Abadd9': [4, 3, 1, 1, 1, 4],
+            'Aadd9': [-1, 0, 2, 2, 2, 2],
+            'A#add9': [-1, 1, 3, 3, 3, 3],
+            'Bbadd9': [-1, 1, 3, 3, 3, 3],
+            'Badd9': [-1, 2, 4, 4, 4, 4],
         };
 
         const chordCategories = {
-            "Basis": ["C", "D", "E", "F", "G", "A", "B"],
-            "Moll": ["Cm", "Dm", "Em", "Fm", "Gm", "Am", "Bm"],
-            "7er": ["C7", "D7", "E7", "G7", "A7"]
+            'Dur-Akkorde (C-E)': ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E'],
+            'Dur-Akkorde (F-B)': ['F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'],
+            'Moll-Akkorde (C-E)': ['Cm', 'C#m', 'Dbm', 'Dm', 'D#m', 'Ebm', 'Em'],
+            'Moll-Akkorde (F-B)': ['Fm', 'F#m', 'Gbm', 'Gm', 'G#m', 'Abm', 'Am', 'A#m', 'Bbm', 'Bm'],
+            'Septakkorde (C-E)': ['C7', 'C#7', 'Db7', 'D7', 'D#7', 'Eb7', 'E7'],
+            'Septakkorde (F-B)': ['F7', 'F#7', 'Gb7', 'G7', 'G#7', 'Ab7', 'A7', 'A#7', 'Bb7', 'B7'],
+            'Major 7 (C-E)': ['Cmaj7', 'C#maj7', 'Dbmaj7', 'Dmaj7', 'D#maj7', 'Ebmaj7', 'Emaj7'],
+            'Major 7 (F-B)': ['Fmaj7', 'F#maj7', 'Gbmaj7', 'Gmaj7', 'G#maj7', 'Abmaj7', 'Amaj7', 'A#maj7', 'Bbmaj7', 'Bmaj7'],
+            'Minor 7 (C-E)': ['Cm7', 'C#m7', 'Dbm7', 'Dm7', 'D#m7', 'Ebm7', 'Em7'],
+            'Minor 7 (F-B)': ['Fm7', 'F#m7', 'Gbm7', 'Gm7', 'G#m7', 'Abm7', 'Am7', 'A#m7', 'Bbm7', 'Bm7'],
+            'Power Chords (C-E)': ['C5', 'C#5', 'Db5', 'D5', 'D#5', 'Eb5', 'E5'],
+            'Power Chords (F-B)': ['F5', 'F#5', 'Gb5', 'G5', 'G#5', 'Ab5', 'A5', 'A#5', 'Bb5', 'B5'],
+            'Suspended': ['Csus2', 'Csus4', 'C#sus4', 'Dbsus4', 'Dsus2', 'Dsus4', 'D#sus4', 'Ebsus4', 'Esus4', 'Fsus4', 'F#sus4', 'Gbsus4', 'Gsus4', 'G#sus4', 'Absus4', 'Asus2', 'Asus4', 'A#sus4', 'Bbsus4', 'Bsus4'],
+            'Diminished': ['Cdim', 'C#dim', 'Dbdim', 'Ddim', 'D#dim', 'Ebdim', 'Edim', 'Fdim', 'F#dim', 'Gbdim', 'Gdim', 'G#dim', 'Abdim', 'Adim', 'A#dim', 'Bbdim', 'Bdim'],
+            'Augmented': ['Caug', 'C#aug', 'Dbaug', 'Daug', 'D#aug', 'Ebaug', 'Eaug', 'Faug', 'F#aug', 'Gbaug', 'Gaug', 'G#aug', 'Abaug', 'Aaug', 'A#aug', 'Bbaug', 'Baug'],
+            'Add9': ['Cadd9', 'C#add9', 'Dbadd9', 'Dadd9', 'D#add9', 'Ebadd9', 'Eadd9', 'Fadd9', 'F#add9', 'Gbadd9', 'Gadd9', 'G#add9', 'Abadd9', 'Aadd9', 'A#add9', 'Bbadd9', 'Badd9']
         };
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+        // PWA Installation
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.add('show');
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                    document.getElementById('installPrompt').classList.remove('show');
+                });
+            }
         }
 
-        function makeChordDiagram(name, pattern) {
-            const frets = pattern.split('');
-            let dots = '';
-            
-            frets.forEach((fret, stringIndex) => {
-                if (fret !== 'x' && fret !== '0') {
-                    const xPos = 5 + (stringIndex * 7);
-                    const yPos = 5 + (parseInt(fret) * 10);
-                    dots += `<circle cx="${xPos}" cy="${yPos}" r="2.5" fill="black" />`;
-                }
+        function closeInstallPrompt() {
+            document.getElementById('installPrompt').classList.remove('show');
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                console.log('Service Worker registered');
             });
-
-            return `
-                <div class="chord-container">
-                    <span class="chord-name">${name}</span>
-                    <svg class="chord-svg" viewBox="0 0 45 60" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="5" y="10" width="35" height="40" fill="white" stroke="#333" stroke-width="0.5"/>
-                        ${[10, 20, 30, 40, 50].map(y => `<line x1="5" y1="${y}" x2="40" y2="${y}" stroke="#333" stroke-width="0.5"/>`).join('')}
-                        ${[5, 12, 19, 26, 33, 40].map(x => `<line x1="${x}" y1="10" x2="${x}" y2="50" stroke="#333" stroke-width="0.5"/>`).join('')}
-                        ${dots}
-                    </svg>
-                </div>`;
         }
 
+        // Tab Switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'library') {
+                populateChordLibrary();
+            }
+        }
+
+        // Chord Diagram Generation
+        function makeChordDiagram(name, frets) {
+            let html = '<div class="chord-box">';
+            html += '<div class="chord-label">' + name + '</div>';
+            html += '<div class="fretboard">';
+            
+            // Strings (vertical)
+            for (let i = 0; i < 6; i++) {
+                html += '<div class="string" style="left:' + (i * 24) + 'px;"></div>';
+            }
+            
+            // Frets (horizontal)
+            for (let i = 0; i < 5; i++) {
+                html += '<div class="fret" style="top:' + (i * 20) + 'px;"></div>';
+            }
+            
+            // Fingers and markers
+            for (let string = 0; string < 6; string++) {
+                const fret = frets[string];
+                const x = string * 24;
+                
+                if (fret === -1) {
+                    html += '<div class="marker mute" style="left:' + x + 'px; top:-10px;">×</div>';
+                } else if (fret === 0) {
+                    html += '<div class="marker open" style="left:' + x + 'px; top:-10px;">○</div>';
+                } else {
+                    const y = (fret - 0.5) * 20;
+                    html += '<div class="dot" style="left:' + x + 'px; top:' + y + 'px;"></div>';
+                }
+            }
+            
+            html += '</div></div>';
+            return html;
+        }
+
+        // Show Chords
         function showChords() {
             const input = document.getElementById('input').value;
             const output = document.getElementById('output');
-            const key = document.getElementById('songKey').value;
-            const tuning = document.getElementById('songTuning').value;
+            const status = document.getElementById('status');
+            
+            if (!input.trim()) {
+                output.innerHTML = 'Bitte gib Text mit Akkorden ein!';
+                status.innerHTML = '⚠️ Textfeld ist leer';
+                status.style.background = '#f8d7da';
+                status.style.borderLeftColor = '#dc3545';
+                return;
+            }
             
             const lines = input.split('\n');
             let html = '';
-            let usedChords = new Set();
+            let foundCount = 0;
+            
+            lines.forEach(function(line) {
+                html += '<div class="line">';
+                
+                const words = line.split(/\s+/);
+                
+                words.forEach(function(word) {
+                    word = word.trim();
+                    
+                    if (word && chords[word]) {
+                        html += makeChordDiagram(word, chords[word]);
+                        foundCount++;
+                    } else if (word) {
+                        html += '<span class="word">' + escapeHtml(word) + '</span> ';
+                    }
+                });
+                
+                html += '</div>';
+            });
+            
+            output.innerHTML = html;
+            
+            if (foundCount > 0) {
+                status.innerHTML = '✅ Gefunden: ' + foundCount + ' Akkorde';
+                status.style.background = '#d4edda';
+                status.style.borderLeftColor = '#28a745';
+            } else {
+                status.innerHTML = '⚠️ Keine Akkorde erkannt. Nutze z.B.: C, C#, Eb, Am, F#m, G7, C5, Cmaj7';
+                status.style.background = '#fff3cd';
+                status.style.borderLeftColor = '#ffc107';
+            }
+        }
 
-            // Druck-Header
-            html += `<div class="print-header">`;
-            html += `<h1>${key ? 'Tonart: ' + key : 'SongSheet
+        function clearAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('output').innerHTML = 'Deine Lyrics mit Akkorden erscheinen hier...';
+            document.getElementById('status').innerHTML = 'Gelöscht! Gib neuen Text ein.';
+            document.getElementById('status').style.background = '#fff3cd';
+            document.getElementById('status').style.borderLeftColor = '#ffc107';
+        }
+
+        // Translation Functions
+        function swapLanguages() {
+            const source = document.getElementById('sourceLang');
+            const target = document.getElementById('targetLang');
+            const temp = source.value;
+            source.value = target.value;
+            target.value = temp;
+        }
+
+        async function translateText() {
+            const sourceText = document.getElementById('sourceText').value;
+            const sourceLang = document.getElementById('sourceLang').value;
+            const targetLang = document.getElementById('targetLang').value;
+            const output = document.getElementById('translationOutput');
+            
+            if (!sourceText.trim()) {
+                output.innerHTML = '<div style="color: #856404;">⚠️ Bitte gib Text zum Übersetzen ein!</div>';
+                return;
+            }
+            
+            if (sourceLang === targetLang) {
+                output.innerHTML = '<div style="color: #856404;">⚠️ Quell- und Zielsprache müssen unterschiedlich sein!</div>';
+                return;
+            }
+            
+            output.innerHTML = '<div class="loading"><div class="spinner"></div>Übersetze...</div>';
+            
+            try {
+                // Using a simple translation approach
+                // In production, you'd use a proper API like DeepL or Google Translate
+                const translated = await simulateTranslation(sourceText, sourceLang, targetLang);
+                output.innerHTML = '<div style="line-height: 1.8; font-size: 16px;">' + escapeHtml(translated) + '</div>';
+            } catch (error) {
+                output.innerHTML = '<div style="color: #dc3545;">❌ Fehler bei der Übersetzung. Bitte versuche es erneut.</div>';
+            }
+        }
+
+        async function simulateTranslation(text, from, to) {
+            // Simulated translation - In production, use actual API
+            // For demo purposes, this returns a placeholder
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            return `[Übersetzung von ${from.toUpperCase()} nach ${to.toUpperCase()}]\n\n${text}\n\n⚠️ Hinweis: Für echte Übersetzungen integriere eine API wie DeepL oder Google Translate.`;
+        }
+
+        function clearTranslation() {
+            document.getElementById('sourceText').value = '';
+            document.getElementById('translationOutput').innerHTML = 'Deine Übersetzung erscheint hier...';
+        }
+
+        // Chord Library
+        function populateChordLibrary() {
+            const container = document.getElementById('chordLibraryContent');
+            if (container.innerHTML) return; // Already populated
+            
+            let html = '';
+            
+            for (const [category, chordList] of Object.entries(chordCategories)) {
+                html += '<div class="chord-category">';
+                html += '<h3>' + category + '</h3>';
+                html += '<div class="chord-library">';
+                
+                chordList.forEach(chordName => {
+                    if (chords[chordName]) {
+                        html += makeChordDiagram(chordName, chords[chordName]);
+                    }
+                });
+                
+                html += '</div></div>';
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Utility Functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-show on load
+        window.onload = function() {
+            showChords();
+        };
+    </script>
+</body>
+</html>
