@@ -1,152 +1,198 @@
-   <!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Chord Studio</title>
+    <title>Chord Studio Pro - Guitar Tool</title>
     <style>
         :root {
-            --bg: #121212;
-            --card: #1e1e1e;
-            --text: #e0e0e0;
-            --accent: #00adb5;
-            --secondary: #393e46;
-            --highlight: #eeeeee;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
         }
 
         body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            font-family: 'Inter', system-ui, sans-serif; 
             background: var(--bg); 
             color: var(--text); 
-            margin: 0; 
-            padding: 0;
-            line-height: 1.6;
+            margin: 0; padding: 20px;
         }
 
-        .container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
 
-        /* Header & Design */
-        header { text-align: center; margin-bottom: 40px; }
-        h1 { color: var(--accent); font-weight: 300; letter-spacing: 2px; }
+        header { text-align: center; padding: 20px 0; }
+        h1 { color: var(--accent); font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 5px; }
+        p.subtitle { color: var(--text-dim); margin-bottom: 30px; }
 
-        /* Tabs Navigation */
+        /* Navigation */
         .tabs { 
-            display: flex; 
-            justify-content: center; 
-            gap: 5px; 
-            margin-bottom: 30px; 
-            background: var(--card);
-            padding: 5px;
-            border-radius: 12px;
+            display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; 
+            background: var(--card); padding: 8px; border-radius: 12px;
         }
         .tab { 
-            padding: 12px 25px; 
-            cursor: pointer; 
-            border-radius: 8px;
-            transition: 0.3s;
-            color: #888;
+            padding: 10px 25px; cursor: pointer; border-radius: 8px; 
+            transition: all 0.2s; color: var(--text-dim); font-weight: 500;
         }
-        .tab.active { background: var(--accent); color: white; font-weight: bold; }
-        .tab-content { display: none; animation: fadeIn 0.4s; }
-        .tab-content.active { display: block; }
+        .tab.active { background: var(--accent); color: #0f172a; }
 
-        /* Eingabebereich */
-        .editor-box {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        /* Main Section */
+        .main-card {
+            background: var(--card); padding: 30px; border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
         }
+
         textarea { 
-            width: 100%; 
-            height: 180px; 
-            background: #252525; 
-            border: 1px solid var(--secondary); 
-            color: var(--highlight); 
-            padding: 15px; 
-            border-radius: 8px; 
-            font-size: 16px;
-            resize: vertical;
-            box-sizing: border-box;
+            width: 100%; height: 200px; background: #0f172a; border: 1px solid #334155;
+            color: white; padding: 20px; border-radius: 12px; font-size: 16px;
+            font-family: 'Fira Code', monospace; resize: vertical; box-sizing: border-box;
         }
 
-        .controls { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        button { 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            background: var(--secondary); 
-            color: white; 
-            transition: 0.2s;
-        }
-        button:hover { background: var(--accent); }
-        .btn-main { background: var(--accent); font-weight: bold; }
-
-        /* Akkord-Diagramme */
-        .chord-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 30px; }
-        .chord-box { 
-            background: #ffffff; 
-            color: #121212; 
-            padding: 15px; 
-            border-radius: 10px; 
-            text-align: center;
-            width: 130px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .chord-label { font-weight: bold; font-size: 1.1em; margin-bottom: 8px; border-bottom: 1px solid #ddd; }
+        .button-bar { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
         
-        .fretboard { position: relative; width: 100px; height: 110px; margin: auto; }
-        .string { position: absolute; width: 1px; height: 100%; background: #444; }
-        .fret { position: absolute; width: 100%; height: 1px; background: #444; }
-        .dot { position: absolute; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; transform: translate(-50%, -50%); z-index: 2; }
-        .marker { position: absolute; transform: translateX(-50%); font-size: 11px; top: -15px; font-weight: bold; }
+        button { 
+            padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;
+            font-weight: 600; transition: transform 0.1s, opacity 0.2s;
+        }
+        button:active { transform: scale(0.95); }
+        .btn-primary { background: var(--accent); color: #0f172a; }
+        .btn-secondary { background: #334155; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
 
-        /* Animation */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Chord Output */
+        .output-title { margin-top: 40px; border-bottom: 1px solid #334155; padding-bottom: 10px; color: var(--accent); }
+        .chord-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+            gap: 20px; margin-top: 20px; 
+        }
 
-        @media print { .no-print { display: none; } body { background: white; color: black; } }
+        /* Das Diagramm-Design */
+        .chord-card { 
+            background: white; color: #1e293b; padding: 15px; border-radius: 12px;
+            text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+        }
+        .chord-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; color: #0f172a; border-bottom: 2px solid #f1f5f9; }
+        
+        .fretboard { position: relative; width: 100px; height: 120px; margin: 0 auto; background: #fff; }
+        .string { position: absolute; width: 1px; height: 100%; background: #cbd5e1; }
+        .fret { position: absolute; width: 100%; height: 1px; background: #94a3b8; }
+        .dot { position: absolute; width: 14px; height: 14px; background: #0f172a; border-radius: 50%; transform: translate(-50%, -50%); z-index: 2; }
+        .marker { position: absolute; transform: translateX(-50%); font-size: 12px; top: -18px; font-weight: bold; }
+
+        /* Print Settings */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; color: black; padding: 0; }
+            .main-card { background: white; box-shadow: none; padding: 0; }
+            .chord-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+            .chord-name { color: black; }
+        }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
+    <header class="no-print">
         <h1>CHORD STUDIO PRO</h1>
+        <p class="subtitle">Einfach Text eingeben – Akkorde automatisch generieren</p>
     </header>
 
     <div class="tabs no-print">
-        <div class="tab active" onclick="switchTab('editor')">Editor</div>
-        <div class="tab" onclick="switchTab('library')">Bibliothek</div>
+        <div class="tab active" id="tab-editor" onclick="switchTab('editor')">Song Editor</div>
+        <div class="tab" id="tab-library" onclick="switchTab('library')">Akkord-Bibliothek</div>
     </div>
 
-    <div id="editor" class="tab-content active">
-        <div class="editor-box">
-            <textarea id="input" placeholder="Tippe Text oder Akkorde (z.B. am7 g c5 dmaj7)..." oninput="process()"></textarea>
-            <div class="controls no-print">
-                <button class="btn-main" onclick="process()">Diagramme generieren</button>
-                <button onclick="document.getElementById('input').value=''; process()">Leeren</button>
-                <button onclick="window.print()">Als PDF speichern</button>
+    <div class="main-card">
+        <div id="view-editor">
+            <textarea id="chordInput" class="no-print" placeholder="Schreibe deinen Text hier... z.B.: Heute spielen wir C G Am F..." oninput="autoProcess()"></textarea>
+            
+            <div class="button-bar no-print">
+                <button class="btn-primary" onclick="processChords()">Diagramme aktualisieren</button>
+                <button class="btn-secondary" onclick="window.print()">🖨️ Jetzt Drucken / PDF</button>
+                <button class="btn-danger" onclick="clearAll()">Löschen</button>
             </div>
-        </div>
-        <div id="output" class="chord-grid"></div>
-    </div>
 
-    <div id="library" class="tab-content">
-        <div class="editor-box" id="libraryContent"></div>
+            <h2 class="output-title">Deine Akkorde:</h2>
+            <div id="chordOutput" class="chord-grid">
+                </div>
+        </div>
+
+        <div id="view-library" class="hidden">
+            <h2 style="color:var(--accent)">Vollständige Bibliothek</h2>
+            <div id="libraryOutput" class="chord-grid"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    // Massive Datenbank mit Erweiterungen
-    const baseChords = {
+    // DIE AKKORD-DATENBANK
+    const chordDb = {
+        // C
         'C': [-1, 3, 2, 0, 1, 0], 'Cm': [-1, 3, 5, 5, 4, 3], 'C7': [-1, 3, 2, 3, 1, 0], 'Cmaj7': [-1, 3, 2, 0, 0, 0], 'C5': [-1, 3, 5, 5, -1, -1], 'Csus2': [-1, 3, 0, 0, 1, 3], 'Csus4': [-1, 3, 3, 0, 1, 1], 'Cadd9': [-1, 3, 2, 0, 3, 0], 'Cm7': [-1, 3, 5, 3, 4, 3],
-        'C#': [-1, 4, 6, 6, 6, 4], 'C#m': [-1, 4, 6, 6, 5, 4], 'C#7': [-1, 4, 3, 4, 2, -1], 'C#maj7': [-1, 4, 6, 5, 6, 4], 'C#5': [-1, 4, 6, 6, -1, -1],
-        'D': [-1, -1, 0, 2, 3, 2], 'Dm': [-1, -1, 0, 2, 3, 1], 'D7': [-1, -1, 0, 2, 1, 2], 'Dmaj7': [-1, -1, 0, 2, 2, 2], 'D5': [-1, 0, 0, 2, 3, -1], 'Dsus2': [-1, -1, 0, 2, 3, 0], 'Dsus4': [-1, -1, 0, 2, 3, 3], 'Dadd9': [-1, -1, 0, 2, 5, 2], 'Dm7': [-1, -1, 0, 2, 1, 1],
-        'Eb': [-1, -1, 1, 3, 4, 3], 'Ebm': [-1, -1, 1, 3, 4, 2], 'Eb7': [-1, -1, 1, 3, 2, 3], 'Ebmaj7': [-1, -1, 1, 3, 3, 3], 'Eb5': [-1, 6, 8, 8, -1, -1],
-        'E': [0, 2, 2, 1, 0, 0], 'Em': [0, 2, 2, 0, 0, 0], 'E7': [0, 2, 0, 1, 0, 0], 'Emaj7': [0, 2, 1, 1, 0, 0], 'E5': [0, 2, 2, -1, -1, -1], 'Esus4': [0, 2, 2, 2, 0, 0], 'Eadd9': [0, 2, 4, 1, 0, 0], 'Em7': [0, 2, 0, 0, 0, 0],
-        'F': [1, 3, 3, 2, 1, 1], 'Fm': [1, 3, 3, 1, 1, 1], 'F7': [1, 3, 1, 2, 1, 1], 'Fmaj7': [-1, 3, 2, 2, 1, 0], 'F5': [1, 3, 3, -1, -1, -1], 'Fsus4': [1, 3, 3, 3, 1, 1], 'Fadd9': [1, 3, 3, 2, 1, 3], 'Fm7': [1, 3, 1, 1, 1, 1],
-        'F#': [2, 4, 4, 3, 2, 2], 'F#m': [2, 4, 4, 2, 2, 2], 'F#7': [2, 4, 2, 3, 2, 2], 'F#5': [2, 4, 4, -1, -1, -1],
-        'G': [3, 2, 0, 0, 0, 3], 'Gm': [3, 5, 5, 3, 3, 3], 'G7': [3, 2, 0, 0, 0, 1], 'Gmaj7': [3, 2, 0, 0, 0, 2], 'G5': [3, 5, 5, -1, -1, -1], 'Gsus4': [3, 3, 0, 0, 1, 3], 'Gadd9': [3, 2, 0, 2, 0, 3], 'Gm7': [3, 5, 3, 3, 3, 3],
-        'Ab': [4, 6, 6, 5, 4, 4], 'Abm': [4, 6, 6, 4, 4, 4], 'Ab7': [4, 6, 4, 5, 4, 4], 'Ab5': [4, 6, 6, -1, -1, -1],
-        'A': [-1, 0, 2, 2, 2, 0], 'Am': [-1, 0, 2,
+        // D
+        'D': [-1, -1, 0, 2, 3, 2], 'Dm': [-1, -1, 0, 2, 3, 1], 'D7': [-1, -1, 0, 2, 1, 2], 'Dmaj7': [-1, -1, 0, 2, 2, 2], 'D5': [-1, -1, 0, 2, 3, -1], 'Dsus2': [-1, -1, 0, 2, 3, 0], 'Dsus4': [-1, -1, 0, 2, 3, 3], 'Dm7': [-1, -1, 0, 2, 1, 1], 'Dadd9': [-1, -1, 0, 2, 5, 2],
+        // E
+        'E': [0, 2, 2, 1, 0, 0], 'Em': [0, 2, 2, 0, 0, 0], 'E7': [0, 2, 0, 1, 0, 0], 'Emaj7': [0, 2, 1, 1, 0, 0], 'E5': [0, 2, 2, -1, -1, -1], 'Em7': [0, 2, 0, 0, 0, 0], 'Esus4': [0, 2, 2, 2, 0, 0],
+        // F
+        'F': [1, 3, 3, 2, 1, 1], 'Fm': [1, 3, 3, 1, 1, 1], 'F7': [1, 3, 1, 2, 1, 1], 'Fmaj7': [-1, 3, 2, 2, 1, 0], 'F5': [1, 3, 3, -1, -1, -1],
+        // G
+        'G': [3, 2, 0, 0, 0, 3], 'Gm': [3, 5, 5, 3, 3, 3], 'G7': [3, 2, 0, 0, 0, 1], 'Gmaj7': [3, 2, 0, 0, 0, 2], 'G5': [3, 5, 5, -1, -1, -1], 'Gsus4': [3, 3, 0, 0, 1, 3], 'Gm7': [3, 5, 3, 3, 3, 3],
+        // A
+        'A': [-1, 0, 2, 2, 2, 0], 'Am': [-1, 0, 2, 2, 1, 0], 'A7': [-1, 0, 2, 0, 2, 0], 'Amaj7': [-1, 0, 2, 1, 2, 0], 'A5': [-1, 0, 2, 2, -1, -1], 'Am7': [-1, 0, 2, 0, 1, 0], 'Asus2': [-1, 0, 2, 2, 0, 0], 'Asus4': [-1, 0, 2, 2, 3, 0],
+        // B / H
+        'B': [-1, 1, 3, 3, 3, 1], 'Bm': [-1, 2, 4, 4, 3, 2], 'B7': [-1, 2, 1, 2, 0, 2], 'H': [-1, 2, 4, 4, 4, 2], 'Hm': [-1, 2, 4, 4, 3, 2], 'H7': [-1, 2, 1, 2, 0, 2],
+        // Sharps / Flats
+        'C#': [-1, 4, 6, 6, 6, 4], 'Db': [-1, 4, 6, 6, 6, 4], 'Eb': [-1, -1, 1, 3, 4, 3], 'F#': [2, 4, 4, 3, 2, 2], 'Ab': [4, 6, 6, 5, 4, 4], 'Bb': [-1, 1, 3, 3, 3, 1]
+    };
+
+    function switchTab(view) {
+        document.getElementById('view-editor').classList.toggle('hidden', view !== 'editor');
+        document.getElementById('view-library').classList.toggle('hidden', view !== 'library');
+        document.getElementById('tab-editor').classList.toggle('active', view === 'editor');
+        document.getElementById('tab-library').classList.toggle('active', view === 'library');
+        if(view === 'library') renderLibrary();
+    }
+
+    function createDiagram(name, frets) {
+        let html = `<div class="chord-card"><div class="chord-name">${name}</div><div class="fretboard">`;
+        // Saiten
+        for (let i = 0; i < 6; i++) html += `<div class="string" style="left:${i * 20}px;"></div>`;
+        // Bünde
+        for (let i = 0; i <= 5; i++) html += `<div class="fret" style="top:${i * 24}px;"></div>`;
+        
+        frets.forEach((fret, string) => {
+            const x = string * 20;
+            if (fret === -1) html += `<div class="marker" style="left:${x}px; color:#ef4444;">×</div>`;
+            else if (fret === 0) html += `<div class="marker" style="left:${x}px; color:#22c55e;">○</div>`;
+            else {
+                const y = (fret * 24) - 12;
+                html += `<div class="dot" style="left:${x}px; top:${y}px;"></div>`;
+            }
+        });
+        return html + '</div></div>';
+    }
+
+    function normalizeName(str) {
+        if (!str) return "";
+        let n = str.trim().replace(/[.,()]/g, '');
+        if (n.length === 0) return "";
+        // Erster Buchstabe groß, Rest klein (außer bei Spezialfällen)
+        let formatted = n.charAt(0).toUpperCase() + n.slice(1);
+        // Falls klein geschrieben (z.B. am7), in Datenbank suchen
+        if (chordDb[formatted]) return formatted;
+        // Falls immer noch nicht gefunden, exakt suchen (z.B. für Bb)
+        if (chordDb[n]) return n;
+        return formatted;
+    }
+
+    function processChords() {
+        const text = document.getElementById('chordInput').value;
+        const output = document.getElementById('chordOutput');
+        output.innerHTML = '';
+        
+        // Wörter trennen
+        const words = text.split(/[\s\n]+/);
+        const foundChords = new Set
