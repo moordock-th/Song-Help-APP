@@ -1,42 +1,49 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChordStudio Ultimate v5</title>
+    <title>ChordStudio Pro v6</title>
     <style>
         :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
-        .container { max-width: 1300px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .no-print { display: block; }
         
-        .header-ui { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end; }
+        /* Navigation & Header */
+        .header-ui { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; align-items: end; border: 1px solid #334155; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 0.7rem; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+        
         input, select, textarea { background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px; width: 100%; box-sizing: border-box; }
-        textarea { height: 400px; font-family: 'Fira Code', monospace; font-size: 15px; }
+        textarea { height: 400px; font-family: 'Fira Code', monospace; font-size: 15px; line-height: 1.5; }
 
         .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 900px) { .app-grid { grid-template-columns: 1fr; } }
 
         /* Vorschau Blatt */
-        .preview-box { background: white; color: #1e293b; padding: 40px; border-radius: 8px; min-height: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .preview-box { background: white; color: #1e293b; padding: 40px; border-radius: 8px; min-height: 800px; }
+        .song-header { border-bottom: 2px solid var(--primary); margin-bottom: 30px; padding-bottom: 10px; }
         .song-line { display: flex; flex-wrap: wrap; line-height: 3.5; min-height: 1.5em; margin-bottom: 5px; }
         .chord-wrap { position: relative; margin-right: 8px; }
-        .chord-label { position: absolute; top: -1.8em; left: 0; font-weight: bold; color: #0284c7; font-size: 14px; font-family: sans-serif; }
+        .chord-label { position: absolute; top: -1.8em; left: 0; font-weight: bold; color: #0284c7; font-size: 14px; }
 
         /* Bibliothek Modal */
         #libModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 1000; padding: 40px; box-sizing: border-box; overflow-y: auto; }
-        .lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; background: #0f172a; padding: 10px; }
-        .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
+        .lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; background: #0f172a; padding: 10px; border-bottom: 1px solid var(--primary); }
+        .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-top: 20px; }
         
-        /* Akkord SVG */
         .chord-item { text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; color: #1e293b; }
-        .chord-item b { display: block; margin-bottom: 5px; font-size: 14px; }
-        svg { width: 80px; height: 100px; }
+        svg { width: 80px; height: 100px; margin: 0 auto; display: block; }
 
         .btn { background: var(--primary); color: #0f172a; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-search { background: #1e293b; color: white; border: 1px solid var(--primary); width: 250px; }
+        .btn-translate { background: #10b981; color: white; width: 100%; margin-top: 10px; }
 
-        @media print { .no-print { display: none !important; } .preview-box { box-shadow: none; padding: 0; } body { background: white; } }
+        @media print { 
+            .no-print { display: none !important; } 
+            .preview-box { box-shadow: none; padding: 0; } 
+            body { background: white; }
+        }
     </style>
 </head>
 <body>
@@ -44,7 +51,7 @@
 <div id="libModal">
     <div class="lib-header">
         <h2 style="color: var(--primary); margin:0;">Akkord-Bibliothek</h2>
-        <input type="text" id="libSearch" class="btn-search" placeholder="Suchen (z.B. C5 oder Am)..." oninput="filterLib()">
+        <input type="text" id="libSearch" style="width: 300px;" placeholder="Suchen (z.B. C5, Am, F#)..." oninput="filterLib()">
         <button class="btn" onclick="toggleLib()" style="background:#ef4444; color:white;">Schließen</button>
     </div>
     <div class="lib-grid" id="libContainer"></div>
@@ -53,41 +60,65 @@
 <div class="container">
     <div class="header-ui no-print">
         <div class="input-group"><label>Song Titel</label><input type="text" id="titleIn" oninput="render()"></div>
-        <button class="btn" onclick="toggleLib()">📚 Bibliothek & Hilfe</button>
+        <div class="input-group"><label>Tonart</label><input type="text" id="keyIn" placeholder="z.B. G-Dur" oninput="render()"></div>
+        <div class="input-group">
+            <label>Tuning</label>
+            <select id="tuningIn" onchange="render()">
+                <option value="Standard (EADGBE)">Standard</option>
+                <option value="Eb Tuning">Eb Tuning</option>
+                <option value="Drop D">Drop D</option>
+                <option value="Open G">Open G</option>
+            </select>
+        </div>
+        <button class="btn" onclick="toggleLib()">📚 Bibliothek</button>
         <button class="btn" style="background:#10b981; color:white;" onclick="window.print()">🖨️ PDF Export</button>
     </div>
 
     <div class="app-grid">
         <div class="no-print">
-            <label style="color:var(--primary); font-weight:bold;">Editor</label>
-            <textarea id="editor" oninput="render()" placeholder="Tippe Akkorde einfach über den Text, z.B.:
-c          g
-dies ist ein test
-oder: ein [am7] wort mit klammer"></textarea>
+            <label style="color:var(--primary); font-weight:bold;">Editor (Akkorde per Leerzeichen oder in [C])</label>
+            <textarea id="editor" oninput="render()" placeholder="c        g
+Dies ist ein Test..."></textarea>
             
-            <div style="margin-top:20px; background:var(--card); padding:15px; border-radius:10px;">
-                <label>Übersetzer (Englisch -> Deutsch)</label>
-                <textarea id="transIn" style="height:80px; margin-top:10px;" placeholder="Englischen Text hier rein..."></textarea>
-                <button class="btn" style="width:100%; margin-top:10px;" onclick="translateNow()">Jetzt Übersetzen</button>
-                <div id="transOut" style="margin-top:10px; font-style:italic; color:var(--primary);"></div>
+            <div style="margin-top:20px; background:var(--card); padding:15px; border-radius:10px; border: 1px solid #334155;">
+                <label>Übersetzer (EN -> DE)</label>
+                <input type="text" id="transIn" placeholder="Englischen Satz hier eingeben...">
+                <button class="btn btn-translate" onclick="translateNow()">Text übersetzen</button>
+                <div id="transOut" style="margin-top:10px; font-size: 0.9rem; color:var(--primary); min-height: 20px;"></div>
             </div>
         </div>
 
         <div class="preview-box">
-            <h1 id="outTitle" style="margin:0; border-bottom: 2px solid #38bdf8; padding-bottom:10px;">Titel</h1>
-            <div id="outContent" style="margin-top:30px;"></div>
+            <div class="song-header">
+                <h1 id="outTitle" style="margin:0;">Titel</h1>
+                <div id="outMeta" style="font-size: 14px; color: #64748b; margin-top: 5px;">Tonart: - | Tuning: -</div>
+            </div>
+            <div id="outContent"></div>
             <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
                 <h3 style="font-size:12px; color:#94a3b8; text-transform:uppercase;">Verwendete Griffe:</h3>
-                <div class="chord-footer lib-grid" id="outChords"></div>
+                <div class="lib-grid" id="outChords" style="color: #1e293b;"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // MASSIVE DATENBANK GENERATOR
-    const chords = {};
-    const notes = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B', 'H'];
-    const types = ['', 'm', '7', 'maj7', 'm7', '5', 'sus2', 'sus4', 'add9'];
+    // MASSIVE AKKORD-DATENBANK
+    const patterns = {
+        'C': [-1,3,2,0,1,0], 'CM': [-1,3,2,0,1,0], 'C7': [-1,3,2,3,1,0], 'CMAJ7': [-1,3,2,0,0,0], 'C5': [-1,3,5,5,-1,-1], 'CSUS2': [-1,3,0,0,3,3], 'CSUS4': [-1,3,3,0,1,1], 'CADD9': [-1,3,2,0,3,0],
+        'C#': [-1,4,6,6,6,4], 'C#M': [-1,4,6,6,5,4], 'C#5': [-1,4,6,6,-1,-1],
+        'D': [-1,-1,0,2,3,2], 'DM': [-1,-1,0,2,3,1], 'D7': [-1,-1,0,2,1,2], 'DMAJ7': [-1,-1,0,2,2,2], 'D5': [-1,0,0,2,3,-1], 'DSUS2': [-1,-1,0,2,3,0], 'DSUS4': [-1,-1,0,2,3,3], 'DADD9': [-1,-1,0,2,5,2],
+        'EB': [-1,6,5,3,4,3], 'EBM': [-1,6,8,8,7,6], 'EB5': [-1,6,8,8,-1,-1],
+        'E': [0,2,2,1,0,0], 'EM': [0,2,2,0,0,0], 'E7': [0,2,0,1,0,0], 'EMAJ7': [0,2,1,1,0,0], 'E5': [0,2,2,-1,-1,-1], 'ESUS4': [0,2,2,2,0,0],
+        'F': [1,3,3,2,1,1], 'FM': [1,3,3,1,1,1], 'F7': [1,3,1,2,1,1], 'F5': [1,3,3,-1,-1,-1],
+        'F#': [2,4,4,3,2,2], 'F#M': [2,4,4,2,2,2], 'F#5': [2,4,4,-1,-1,-1],
+        'G': [3,2,0,0,0,3], 'GM': [3,5,5,3,3,3], 'G7': [3,2,0,0,0,1], 'GMAJ7': [3,2,0,0,0,2], 'G5': [3,5,5,-1,-1,-1], 'GSUS4': [3,3,0,0,3,3],
+        'AB': [4,6,6,5,4,4], 'AM': [-1,0,2,2,1,0], 'A': [-1,0,2,2,2,0], 'A7': [-1,0,2,0,2,0], 'AMAJ7': [-1,0,2,1,2,0], 'A5': [-1,0,2,2,-1,-1], 'ASUS2': [-1,0,2,2,0,0], 'ASUS4': [-1,0,2,2,3,0],
+        'BB': [-1,1,3,3,3,1], 'B': [-1,2,4,4,4,2], 'H': [-1,2,4,4,4,2], 'HM': [-1,2,4,4,3,2], 'H7': [-1,2,1,2,0,2], 'H5': [-1,2,4,4,-1,-1]
+    };
 
-    // Basis-Positionen (Be
+    function createSvg(frets) {
+        if(!frets) return '';
+        let svg = `<svg viewBox="0 0 100 120"><line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="3"/>`;
+        for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
+        for
