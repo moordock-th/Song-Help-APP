@@ -1,124 +1,184 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChordStudio Pro v6</title>
+    <title>ChordStudio Pro v4 - Songwriter & Translator</title>
     <style>
         :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .no-print { display: block; }
         
-        /* Navigation & Header */
-        .header-ui { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; align-items: end; border: 1px solid #334155; }
+        .header-ui { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .input-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 0.7rem; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+        label { font-size: 0.75rem; color: var(--primary); font-weight: bold; text-transform: uppercase; }
         
-        input, select, textarea { background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px; width: 100%; box-sizing: border-box; }
-        textarea { height: 400px; font-family: 'Fira Code', monospace; font-size: 15px; line-height: 1.5; }
+        input, select, textarea { background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px; }
+        textarea { width: 100%; height: 350px; font-family: 'Fira Code', monospace; font-size: 14px; resize: none; box-sizing: border-box; }
 
-        .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         @media (max-width: 900px) { .app-grid { grid-template-columns: 1fr; } }
 
-        /* Vorschau Blatt */
-        .preview-box { background: white; color: #1e293b; padding: 40px; border-radius: 8px; min-height: 800px; }
-        .song-header { border-bottom: 2px solid var(--primary); margin-bottom: 30px; padding-bottom: 10px; }
-        .song-line { display: flex; flex-wrap: wrap; line-height: 3.5; min-height: 1.5em; margin-bottom: 5px; }
-        .chord-wrap { position: relative; margin-right: 8px; }
-        .chord-label { position: absolute; top: -1.8em; left: 0; font-weight: bold; color: #0284c7; font-size: 14px; }
+        /* Translator Box */
+        .translator-section { background: #1e293b; padding: 15px; border-radius: 12px; margin-top: 20px; border: 1px dashed var(--primary); }
+        .translation-res { background: #0f172a; padding: 10px; border-radius: 6px; margin-top: 10px; min-height: 50px; font-style: italic; color: #cbd5e1; }
 
-        /* Bibliothek Modal */
-        #libModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 1000; padding: 40px; box-sizing: border-box; overflow-y: auto; }
-        .lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; background: #0f172a; padding: 10px; border-bottom: 1px solid var(--primary); }
-        .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-top: 20px; }
-        
-        .chord-item { text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; color: #1e293b; }
-        svg { width: 80px; height: 100px; margin: 0 auto; display: block; }
+        /* Vorschau / Druck-Layout */
+        .preview-box { background: white; color: #1e293b; padding: 40px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 600px; }
+        .song-header { border-bottom: 3px solid #38bdf8; margin-bottom: 20px; padding-bottom: 10px; }
+        .song-title { font-size: 28px; font-weight: 900; margin: 0; }
+        .meta-info { font-size: 14px; color: #64748b; margin-top: 5px; }
 
-        .btn { background: var(--primary); color: #0f172a; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-translate { background: #10b981; color: white; width: 100%; margin-top: 10px; }
+        .song-line { display: flex; flex-wrap: wrap; line-height: 3; margin-bottom: 5px; min-height: 1.5em; }
+        .chord-wrap { position: relative; margin-right: 4px; }
+        .chord-label { position: absolute; top: -1.6em; left: 0; font-weight: bold; color: #0284c7; font-size: 15px; white-space: nowrap; }
 
-        @media print { 
-            .no-print { display: none !important; } 
-            .preview-box { box-shadow: none; padding: 0; } 
+        .chord-footer { margin-top: 50px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .chord-item { text-align: center; font-size: 11px; }
+        svg { width: 80px; height: 100px; }
+
+        .btn { background: var(--primary); color: #0f172a; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: white; }
+        .btn-translate { background: #10b981; color: white; margin-top: 10px; }
+
+        @media print {
+            .no-print { display: none !important; }
             body { background: white; }
+            .preview-box { box-shadow: none; padding: 0; }
+            .container { max-width: 100%; padding: 0; }
         }
     </style>
 </head>
 <body>
 
-<div id="libModal">
-    <div class="lib-header">
-        <h2 style="color: var(--primary); margin:0;">Akkord-Bibliothek</h2>
-        <input type="text" id="libSearch" style="width: 300px;" placeholder="Suchen (z.B. C5, Am, F#)..." oninput="filterLib()">
-        <button class="btn" onclick="toggleLib()" style="background:#ef4444; color:white;">Schließen</button>
-    </div>
-    <div class="lib-grid" id="libContainer"></div>
-</div>
-
 <div class="container">
     <div class="header-ui no-print">
-        <div class="input-group"><label>Song Titel</label><input type="text" id="titleIn" oninput="render()"></div>
-        <div class="input-group"><label>Tonart</label><input type="text" id="keyIn" placeholder="z.B. G-Dur" oninput="render()"></div>
         <div class="input-group">
-            <label>Tuning</label>
+            <label>Song Titel</label>
+            <input type="text" id="titleIn" placeholder="z.B. Yesterday" oninput="render()">
+        </div>
+        <div class="input-group">
+            <label>Tonart</label>
+            <input type="text" id="keyIn" placeholder="z.B. F-Dur" oninput="render()">
+        </div>
+        <div class="input-group">
+            <label>Stimmung</label>
             <select id="tuningIn" onchange="render()">
-                <option value="Standard (EADGBE)">Standard</option>
-                <option value="Eb Tuning">Eb Tuning</option>
-                <option value="Drop D">Drop D</option>
-                <option value="Open G">Open G</option>
+                <option value="Standard">Standard (EADGBE)</option>
+                <option value="Eb">Eb Tuning</option>
+                <option value="DropD">Drop D</option>
             </select>
         </div>
-        <button class="btn" onclick="toggleLib()">📚 Bibliothek</button>
-        <button class="btn" style="background:#10b981; color:white;" onclick="window.print()">🖨️ PDF Export</button>
+        <button class="btn" onclick="window.print()">🖨️ PDF / DRUCKEN</button>
     </div>
 
     <div class="app-grid">
         <div class="no-print">
-            <label style="color:var(--primary); font-weight:bold;">Editor (Akkorde per Leerzeichen oder in [C])</label>
-            <textarea id="editor" oninput="render()" placeholder="c        g
-Dies ist ein Test..."></textarea>
+            <label>Editor (Akkorde in Zeilen oder [C] Klammern)</label>
+            <textarea id="editor" oninput="render()" placeholder="[G] Somewhere [D] over the rainbow..."></textarea>
             
-            <div style="margin-top:20px; background:var(--card); padding:15px; border-radius:10px; border: 1px solid #334155;">
-                <label>Übersetzer (EN -> DE)</label>
-                <input type="text" id="transIn" placeholder="Englischen Satz hier eingeben...">
+            <div class="translator-section">
+                <label>🌍 Songtext-Übersetzer (EN -> DE)</label>
+                <textarea id="transIn" style="height: 100px; margin-top:5px;" placeholder="Hier englischen Text zum Übersetzen einfügen..."></textarea>
                 <button class="btn btn-translate" onclick="translateNow()">Text übersetzen</button>
-                <div id="transOut" style="margin-top:10px; font-size: 0.9rem; color:var(--primary); min-height: 20px;"></div>
+                <div id="transOut" class="translation-res">Die Übersetzung erscheint hier...</div>
             </div>
         </div>
 
-        <div class="preview-box">
+        <div class="preview-box" id="preview">
             <div class="song-header">
-                <h1 id="outTitle" style="margin:0;">Titel</h1>
-                <div id="outMeta" style="font-size: 14px; color: #64748b; margin-top: 5px;">Tonart: - | Tuning: -</div>
+                <h1 class="song-title" id="outTitle">Titel</h1>
+                <div class="meta-info" id="outMeta">Key: - | Tuning: -</div>
             </div>
             <div id="outContent"></div>
-            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
-                <h3 style="font-size:12px; color:#94a3b8; text-transform:uppercase;">Verwendete Griffe:</h3>
-                <div class="lib-grid" id="outChords" style="color: #1e293b;"></div>
-            </div>
+            <div class="chord-footer" id="outChords"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // MASSIVE AKKORD-DATENBANK
     const patterns = {
-        'C': [-1,3,2,0,1,0], 'CM': [-1,3,2,0,1,0], 'C7': [-1,3,2,3,1,0], 'CMAJ7': [-1,3,2,0,0,0], 'C5': [-1,3,5,5,-1,-1], 'CSUS2': [-1,3,0,0,3,3], 'CSUS4': [-1,3,3,0,1,1], 'CADD9': [-1,3,2,0,3,0],
-        'C#': [-1,4,6,6,6,4], 'C#M': [-1,4,6,6,5,4], 'C#5': [-1,4,6,6,-1,-1],
-        'D': [-1,-1,0,2,3,2], 'DM': [-1,-1,0,2,3,1], 'D7': [-1,-1,0,2,1,2], 'DMAJ7': [-1,-1,0,2,2,2], 'D5': [-1,0,0,2,3,-1], 'DSUS2': [-1,-1,0,2,3,0], 'DSUS4': [-1,-1,0,2,3,3], 'DADD9': [-1,-1,0,2,5,2],
-        'EB': [-1,6,5,3,4,3], 'EBM': [-1,6,8,8,7,6], 'EB5': [-1,6,8,8,-1,-1],
-        'E': [0,2,2,1,0,0], 'EM': [0,2,2,0,0,0], 'E7': [0,2,0,1,0,0], 'EMAJ7': [0,2,1,1,0,0], 'E5': [0,2,2,-1,-1,-1], 'ESUS4': [0,2,2,2,0,0],
-        'F': [1,3,3,2,1,1], 'FM': [1,3,3,1,1,1], 'F7': [1,3,1,2,1,1], 'F5': [1,3,3,-1,-1,-1],
-        'F#': [2,4,4,3,2,2], 'F#M': [2,4,4,2,2,2], 'F#5': [2,4,4,-1,-1,-1],
-        'G': [3,2,0,0,0,3], 'GM': [3,5,5,3,3,3], 'G7': [3,2,0,0,0,1], 'GMAJ7': [3,2,0,0,0,2], 'G5': [3,5,5,-1,-1,-1], 'GSUS4': [3,3,0,0,3,3],
-        'AB': [4,6,6,5,4,4], 'AM': [-1,0,2,2,1,0], 'A': [-1,0,2,2,2,0], 'A7': [-1,0,2,0,2,0], 'AMAJ7': [-1,0,2,1,2,0], 'A5': [-1,0,2,2,-1,-1], 'ASUS2': [-1,0,2,2,0,0], 'ASUS4': [-1,0,2,2,3,0],
-        'BB': [-1,1,3,3,3,1], 'B': [-1,2,4,4,4,2], 'H': [-1,2,4,4,4,2], 'HM': [-1,2,4,4,3,2], 'H7': [-1,2,1,2,0,2], 'H5': [-1,2,4,4,-1,-1]
+        'C': [-1,3,2,0,1,0], 'Cm': [-1,3,5,5,4,3], 'D': [-1,-1,0,2,3,2], 'Dm': [-1,-1,0,2,3,1],
+        'E': [0,2,2,1,0,0], 'Em': [0,2,2,0,0,0], 'F': [1,3,3,2,1,1], 'G': [3,2,0,0,0,3],
+        'A': [-1,0,2,2,2,0], 'Am': [-1,0,2,2,1,0], 'H': [-1,2,4,4,4,2], 'Hm': [-1,2,4,4,3,2],
+        'Bb': [-1,1,3,3,3,1], 'F#m': [2,4,4,2,2,2], 'C#m': [-1,4,6,6,5,4]
     };
 
     function createSvg(frets) {
-        if(!frets) return '';
         let svg = `<svg viewBox="0 0 100 120"><line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="3"/>`;
         for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
-        for
+        for(let i=0; i<5; i++) svg += `<line x1="10" y1="${20+i*20}" x2="90" y2="${20+i*20}" stroke="#ccc"/>`;
+        frets.forEach((f, s) => {
+            if(f === 0) svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
+            else if(f > 0) svg += `<circle cx="${10+s*16}" cy="${20+f*20-10}" r="6" fill="black"/>`;
+            else if(f === -1) svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
+        });
+        return svg + `</svg>`;
+    }
+
+    async function translateNow() {
+        const text = document.getElementById('transIn').value;
+        const out = document.getElementById('transOut');
+        if(!text) return;
+        out.innerText = "Wird übersetzt...";
+        try {
+            const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|de`);
+            const data = await res.json();
+            out.innerText = data.responseData.translatedText;
+        } catch(e) { out.innerText = "Fehler bei der Verbindung."; }
+    }
+
+    function isChord(word) {
+        const clean = word.replace(/[()\[\]]/g, '');
+        const chordRegex = /^[A-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim)?$/i;
+        return chordRegex.test(clean);
+    }
+
+    function render() {
+        const input = document.getElementById('editor').value;
+        const outContent = document.getElementById('outContent');
+        const outChords = document.getElementById('outChords');
+        const found = new Set();
+        
+        document.getElementById('outTitle').innerText = document.getElementById('titleIn').value || 'Unbenannter Song';
+        document.getElementById('outMeta').innerText = `Key: ${document.getElementById('keyIn').value} | Tuning: ${document.getElementById('tuningIn').value}`;
+
+        outContent.innerHTML = '';
+        outChords.innerHTML = '';
+
+        input.split('\n').forEach(line => {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'song-line';
+            const words = line.trim().split(/\s+/);
+            const isChordLine = words.length > 0 && words.every(w => isChord(w));
+
+            if (isChordLine && line.trim() !== "") {
+                let formattedLine = line.replace(/(\S+)/g, (match) => {
+                    let c = match.replace(/[\[\]]/g, '');
+                    found.add(c);
+                    return `<span class="chord-wrap"><span class="chord-label">${c}</span>&nbsp;</span>`;
+                });
+                lineDiv.innerHTML = formattedLine;
+            } else if (line.includes('[')) {
+                lineDiv.innerHTML = line.replace(/\[([^\]]+)\]([^\[]*)/g, (m, c, t) => {
+                    found.add(c);
+                    return `<span class="chord-wrap"><span class="chord-label">${c}</span><span>${t.replace(/ /g, '&nbsp;')}</span></span>`;
+                });
+            } else {
+                lineDiv.innerText = line || ' ';
+            }
+            outContent.appendChild(lineDiv);
+        });
+
+        found.forEach(c => {
+            let normalized = c.charAt(0).toUpperCase() + c.slice(1);
+            if(patterns[normalized]) {
+                outChords.innerHTML += `<div class="chord-item"><b>${normalized}</b><br>${createSvg(patterns[normalized])}</div>`;
+            }
+        });
+    }
+    window.onload = render;
+</script>
+</body>
+</html>
