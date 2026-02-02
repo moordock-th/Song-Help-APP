@@ -1,157 +1,93 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChordStudio Ultimate</title>
+    <title>ChordStudio Ultimate v5</title>
     <style>
         :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 20px; }
         .no-print { display: block; }
         
         .header-ui { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 0.7rem; color: var(--primary); font-weight: bold; text-transform: uppercase; }
-        
-        input, select, textarea { background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px; }
-        textarea { width: 100%; height: 300px; font-family: 'Fira Code', monospace; font-size: 14px; }
+        input, select, textarea { background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 6px; width: 100%; box-sizing: border-box; }
+        textarea { height: 400px; font-family: 'Fira Code', monospace; font-size: 15px; }
 
         .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 900px) { .app-grid { grid-template-columns: 1fr; } }
 
-        /* Vorschau */
-        .preview-box { background: white; color: #1e293b; padding: 40px; border-radius: 8px; min-height: 600px; }
-        .song-line { display: flex; flex-wrap: wrap; line-height: 3.2; min-height: 1.5em; }
-        .chord-wrap { position: relative; margin-right: 6px; }
-        .chord-label { position: absolute; top: -1.8em; left: 0; font-weight: bold; color: #0284c7; font-size: 14px; }
-
-        /* Akkord-Diagramme */
-        .chord-footer { margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; border-top: 1px solid #eee; padding-top: 20px; }
-        .chord-item { text-align: center; font-size: 10px; color: #333; }
-        svg { width: 70px; height: 90px; display: block; margin: 0 auto; }
+        /* Vorschau Blatt */
+        .preview-box { background: white; color: #1e293b; padding: 40px; border-radius: 8px; min-height: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .song-line { display: flex; flex-wrap: wrap; line-height: 3.5; min-height: 1.5em; margin-bottom: 5px; }
+        .chord-wrap { position: relative; margin-right: 8px; }
+        .chord-label { position: absolute; top: -1.8em; left: 0; font-weight: bold; color: #0284c7; font-size: 14px; font-family: sans-serif; }
 
         /* Bibliothek Modal */
-        #libModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 20px; }
-        .close-lib { position: sticky; top: 0; background: var(--primary); color: black; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 20px; }
+        #libModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 1000; padding: 40px; box-sizing: border-box; overflow-y: auto; }
+        .lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 0; background: #0f172a; padding: 10px; }
+        .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
+        
+        /* Akkord SVG */
+        .chord-item { text-align: center; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; color: #1e293b; }
+        .chord-item b { display: block; margin-bottom: 5px; font-size: 14px; }
+        svg { width: 80px; height: 100px; }
 
-        .btn { background: var(--primary); color: #0f172a; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-sec { background: #475569; color: white; }
+        .btn { background: var(--primary); color: #0f172a; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-search { background: #1e293b; color: white; border: 1px solid var(--primary); width: 250px; }
 
-        @media print { .no-print { display: none !important; } .preview-box { box-shadow: none; padding: 0; } }
+        @media print { .no-print { display: none !important; } .preview-box { box-shadow: none; padding: 0; } body { background: white; } }
     </style>
 </head>
 <body>
 
 <div id="libModal">
-    <button class="close-lib" onclick="toggleLib()">✖ Schließen</button>
+    <div class="lib-header">
+        <h2 style="color: var(--primary); margin:0;">Akkord-Bibliothek</h2>
+        <input type="text" id="libSearch" class="btn-search" placeholder="Suchen (z.B. C5 oder Am)..." oninput="filterLib()">
+        <button class="btn" onclick="toggleLib()" style="background:#ef4444; color:white;">Schließen</button>
+    </div>
     <div class="lib-grid" id="libContainer"></div>
 </div>
 
 <div class="container">
     <div class="header-ui no-print">
-        <div class="input-group">
-            <label>Titel</label>
-            <input type="text" id="titleIn" oninput="render()">
-        </div>
-        <div class="input-group">
-            <label>Stimmung</label>
-            <select id="tuningIn" onchange="render()">
-                <option>Standard</option>
-                <option>Eb Tuning</option>
-                <option>Drop D</option>
-            </select>
-        </div>
-        <button class="btn-sec" onclick="toggleLib()">📚 Akkord-Bibliothek</button>
-        <button class="btn" onclick="window.print()">🖨️ PDF Drucken</button>
+        <div class="input-group"><label>Song Titel</label><input type="text" id="titleIn" oninput="render()"></div>
+        <button class="btn" onclick="toggleLib()">📚 Bibliothek & Hilfe</button>
+        <button class="btn" style="background:#10b981; color:white;" onclick="window.print()">🖨️ PDF Export</button>
     </div>
 
     <div class="app-grid">
         <div class="no-print">
-            <textarea id="editor" oninput="render()" placeholder="Schreibe hier... [C5] Rock [G] Song"></textarea>
+            <label style="color:var(--primary); font-weight:bold;">Editor</label>
+            <textarea id="editor" oninput="render()" placeholder="Tippe Akkorde einfach über den Text, z.B.:
+c          g
+dies ist ein test
+oder: ein [am7] wort mit klammer"></textarea>
             
-            <div style="margin-top:15px; background: #1e293b; padding:15px; border-radius:8px;">
-                <label>🌍 Übersetzer (EN -> DE)</label>
-                <input type="text" id="transIn" style="width:100%; margin: 10px 0;" placeholder="Englischen Text hierher...">
-                <button class="btn" onclick="translateNow()" style="width:100%">Übersetzen</button>
-                <div id="transOut" style="margin-top:10px; font-size:0.9rem; color: #38bdf8;"></div>
+            <div style="margin-top:20px; background:var(--card); padding:15px; border-radius:10px;">
+                <label>Übersetzer (Englisch -> Deutsch)</label>
+                <textarea id="transIn" style="height:80px; margin-top:10px;" placeholder="Englischen Text hier rein..."></textarea>
+                <button class="btn" style="width:100%; margin-top:10px;" onclick="translateNow()">Jetzt Übersetzen</button>
+                <div id="transOut" style="margin-top:10px; font-style:italic; color:var(--primary);"></div>
             </div>
         </div>
 
         <div class="preview-box">
-            <h1 id="outTitle" style="margin:0">Titel</h1>
-            <p id="outMeta" style="color:#64748b; font-size:0.8rem; margin-bottom:20px;"></p>
-            <div id="outContent"></div>
-            <div class="chord-footer" id="outChords"></div>
+            <h1 id="outTitle" style="margin:0; border-bottom: 2px solid #38bdf8; padding-bottom:10px;">Titel</h1>
+            <div id="outContent" style="margin-top:30px;"></div>
+            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
+                <h3 style="font-size:12px; color:#94a3b8; text-transform:uppercase;">Verwendete Griffe:</h3>
+                <div class="chord-footer lib-grid" id="outChords"></div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // MASSIVE AKKORD-DATENBANK (Logik-basiert)
-    const baseChords = {
-        'C': [-1,3,2,0,1,0], 'C#': [-1,4,6,6,6,4], 'Db': [-1,4,6,6,6,4], 'D': [-1,-1,0,2,3,2], 
-        'Eb': [-1,6,5,3,4,3], 'E': [0,2,2,1,0,0], 'F': [1,3,3,2,1,1], 'F#': [2,4,4,3,2,2], 
-        'G': [3,2,0,0,0,3], 'Ab': [4,6,6,5,4,4], 'A': [-1,0,2,2,2,0], 'Bb': [-1,1,3,3,3,1], 'B': [-1,2,4,4,4,2], 'H': [-1,2,4,4,4,2]
-    };
+    // MASSIVE DATENBANK GENERATOR
+    const chords = {};
+    const notes = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B', 'H'];
+    const types = ['', 'm', '7', 'maj7', 'm7', '5', 'sus2', 'sus4', 'add9'];
 
-    // Erweiterungen generieren
-    const fullDb = {};
-    Object.keys(baseChords).forEach(root => {
-        const f = baseChords[root];
-        fullDb[root] = f; // Dur
-        fullDb[root+'m'] = [...f]; // Vereinfachte Logik für Demo (in Echt präziser)
-        fullDb[root+'5'] = [f[0], f[1], f[2], -1, -1, -1]; // Powerchord (Grundton + Quinte)
-        fullDb[root+'7'] = [...f]; 
-        fullDb[root+'maj7'] = [...f];
-        fullDb[root+'sus2'] = [...f];
-        fullDb[root+'sus4'] = [...f];
-        fullDb[root+'add9'] = [...f];
-    });
-
-    // Manuelle Korrekturen für wichtige Typen
-    fullDb['Am'] = [-1,0,2,2,1,0]; fullDb['Em'] = [0,2,2,0,0,0]; fullDb['Dm'] = [-1,-1,0,2,3,1];
-    fullDb['C5'] = [-1,3,5,5,-1,-1]; fullDb['D5'] = [-1,5,7,7,-1,-1]; fullDb['G5'] = [3,5,5,-1,-1,-1];
-    fullDb['A5'] = [5,7,7,-1,-1,-1]; fullDb['E5'] = [0,2,2,-1,-1,-1];
-
-    function createSvg(frets) {
-        if(!frets) return '';
-        let svg = `<svg viewBox="0 0 100 120"><line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="3"/>`;
-        for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
-        for(let i=0; i<5; i++) svg += `<line x1="10" y1="${20+i*20}" x2="90" y2="${20+i*20}" stroke="#ccc"/>`;
-        frets.forEach((f, s) => {
-            if(f === 0) svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
-            else if(f > 0) svg += `<circle cx="${10+s*16}" cy="${20+f*20-10}" r="6" fill="black"/>`;
-            else if(f === -1) svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
-        });
-        return svg + `</svg>`;
-    }
-
-    function toggleLib() {
-        const m = document.getElementById('libModal');
-        const c = document.getElementById('libContainer');
-        m.style.display = m.style.display === 'block' ? 'none' : 'block';
-        if(c.innerHTML === "") {
-            Object.keys(fullDb).sort().forEach(chord => {
-                c.innerHTML += `<div class="chord-item" style="color:white"><b>${chord}</b>${createSvg(fullDb[chord])}</div>`;
-            });
-        }
-    }
-
-    async function translateNow() {
-        const text = document.getElementById('transIn').value;
-        const out = document.getElementById('transOut');
-        out.innerText = "Übersetze...";
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|de`);
-        const data = await res.json();
-        out.innerText = data.responseData.translatedText;
-    }
-
-    function render() {
-        const input = document.getElementById('editor').value;
-        const outContent = document.getElementById('outContent');
-        const outChords = document.getElementById('outChords');
-        const found = new Set();
-        
-        document.getElementById('outTitle').innerText = document.getElementById('titleIn').value || 'Unbenannt';
+    // Basis-Positionen (Be
