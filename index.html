@@ -62,6 +62,11 @@
         <div class="no-print">
             <label>Editor (Akkorde einfach reinschreiben)</label>
             <textarea id="editor" oninput="render()" placeholder="Em7 G D A7&#10;Today is gonna be the day..."></textarea>
+       <div class="no-print" style="margin-top: 30px;">
+    <button class="btn" style="background: #475569; width: 100%;" onclick="toggleLibrary()">📚 Akkord-Bibliothek einblenden</button>
+    <div id="chordLibrary" style="display: none; background: var(--card); margin-top: 10px; padding: 20px; border-radius: 12px; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px;">
+        </div>
+</div>
         </div>
 
         <div class="preview-box" id="preview">
@@ -149,6 +154,22 @@ function render() {
     });
 }
 window.onload = render;
-</script>
+    function toggleLibrary() {
+    const lib = document.getElementById('chordLibrary');
+    if (lib.style.display === 'none') {
+        lib.style.display = 'grid';
+        lib.innerHTML = ''; // Reset
+        // Sortiert die Akkorde alphabetisch für die Ansicht
+        Object.keys(patterns).sort().forEach(chord => {
+            lib.innerHTML += `
+                <div class="chord-item" style="background: #0f172a; padding: 10px; border-radius: 8px;">
+                    <b style="color: var(--primary)">${chord}</b><br>
+                    ${createSvg(patterns[chord])}
+                </div>`;
+        });
+    } else {
+        lib.style.display = 'none';
+    }
+}</script>
 </body>
 </html>      
