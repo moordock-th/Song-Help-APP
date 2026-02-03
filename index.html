@@ -87,7 +87,7 @@ const baseShapes = {
 };
 
 // WICHTIG: A# wurde hier explizit hinzugefügt
-const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
+ const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
 // 1. Basis-Generierung (E- und A-Shape)
@@ -131,7 +131,9 @@ patterns['Dm'] = [-1,-1,0,2,3,1]; patterns['Am'] = [-1,0,2,2,1,0]; patterns['Em'
 
 // Manuelle Fixes für deutsche Notation
 patterns['H5'] = patterns['B5'];
-patterns['Hm'] = patterns['Bm'];    
+patterns['Hm'] = patterns['Bm'];
+    
+    
 function isChord(word) {
     const clean = word.replace(/[()\[\]]/g, '').trim();
     if (!clean) return false;
