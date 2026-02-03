@@ -46,43 +46,45 @@
 <body>
 
 <div class="container">
-<div class="header-ui no-print">
-    <div class="input-group">
-        <label>Song Titel</label>
-        <input type="text" id="titleIn" placeholder="z.B. Wonderwall" oninput="render()">
+    <div style="padding: 10px 0; color: var(--primary); font-size: 0.9rem; font-weight: bold;" class="no-print">
+        Song-Helper App Pro made by Superwanze
     </div>
-    <div class="input-group">
-        <label>Tonart</label>
-        <input type="text" id="keyIn" placeholder="z.B. G-Dur" oninput="render()">
+
+    <div class="header-ui no-print">
+        <div class="input-group">
+            <label>Song Titel</label>
+            <input type="text" id="titleIn" placeholder="z.B. Wonderwall" oninput="render()">
+        </div>
+        <div class="input-group">
+            <label>Tonart</label>
+            <input type="text" id="keyIn" placeholder="z.B. G-Dur" oninput="render()">
+        </div>
+        <div class="input-group">
+            <label>Gitarren-Tuning</label>
+            <select id="tuningSelect" onchange="render()">
+                <option value="standard">Standard (E A D G B E)</option>
+                <option value="eb">Eb Tuning (Halbton tiefer)</option>
+                <option value="dropD">Drop D (D A D G B E)</option>
+            </select>
+        </div>
+        <button class="btn" onclick="window.print()">🖨️ PDF / DRUCKEN</button>
     </div>
-    
-    <div class="input-group">
-        <label>Gitarren-Tuning</label>
-        <select id="tuningSelect" onchange="render()">
-            <option value="standard">Standard (E A D G B E)</option>
-            <option value="eb">Eb Tuning (Halbton tiefer)</option>
-            <option value="dropD">Drop D (D A D G B E)</option>
-        </select>
-    </div>
-    <button class="btn" onclick="window.print()">🖨️ PDF / DRUCKEN</button>
-</div>
-    
 
     <div class="app-grid">
         <div class="no-print">
-            <label>Editor (Akkorde einfach reinschreiben)</label>
-            <textarea id="editor" oninput="render()" placeholder="Em7 G D A7&#10;Today is gonna be the day..."></textarea>
-       <div class="no-print" style="margin-top: 30px;">
-    <button class="btn" style="background: #475569; width: 100%;" onclick="toggleLibrary()">📚 Akkord-Bibliothek einblenden</button>
-    <div id="chordLibrary" style="display: none; background: var(--card); margin-top: 10px; padding: 20px; border-radius: 12px; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px;">
-        </div>
-</div>
+            <label>Editor</label>
+            <textarea id="editor" oninput="render()" placeholder="Akkorde hier eingeben..."></textarea>
+            <div class="no-print" style="margin-top: 30px;">
+                <button class="btn" style="background: #475569; width: 100%;" onclick="toggleLibrary()">📚 Akkord-Bibliothek</button>
+                <div id="chordLibrary" style="display: none; background: var(--card); margin-top: 10px; padding: 20px; border-radius: 12px; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px;"></div>
+            </div>
         </div>
 
         <div class="preview-box" id="preview">
+            <div style="font-size: 10px; color: #94a3b8; margin-bottom: 10px;">Song-Helper App Pro made by Superwanze</div>
             <div class="song-header">
                 <h1 class="song-title" id="outTitle">Titel</h1>
-                <div class="meta-info" id="outMeta">Key: -</div>
+                <div class="meta-info" id="outMeta">Key: - | Tuning: Standard</div>
             </div>
             <div id="outContent"></div>
             <div class="chord-footer" id="outChords"></div>
@@ -90,6 +92,7 @@
     </div>
 </div>
 
+    
 <script>
     // HIER EINFÜGEN
 const tuningOffsets = {
@@ -209,10 +212,13 @@ function render() {
     const input = document.getElementById('editor').value;
     const outContent = document.getElementById('outContent');
     const outChords = document.getElementById('outChords');
+    const tuningText = document.getElementById('tuningSelect').options[document.getElementById('tuningSelect').selectedIndex].text;
     const found = new Set();
     
     document.getElementById('outTitle').innerText = document.getElementById('titleIn').value || 'Mein Song';
-    document.getElementById('outMeta').innerText = `Key: ${document.getElementById('keyIn').value}`;
+    
+    // Hier wird das Tuning in die Meta-Info geschrieben
+    document.getElementById('outMeta').innerText = `Key: ${document.getElementById('keyIn').value} | Tuning: ${tuningText}`;
 
     outContent.innerHTML = '';
     outChords.innerHTML = '';
