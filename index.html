@@ -144,22 +144,21 @@ function getPowerchordPattern(noteIndex) {
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
         if (ext === '5') {
-            // POWERCHORD: Verwende korrigierte Logik
-            patterns[note + ext] = getPowerchordPattern(i);
+            // Powerchord-Logik: 3 Töne (Grundton, Quinte, Oktave)
+            if (i <= 4) { // E-Form (E5 bis G#5)
+                patterns[note + ext] = [i, i + 2, i + 2, -1, -1, -1];
+            } else { // A-Form (A5 bis D#5) -> C5 ist hier!
+                let fret = i - 5; 
+                patterns[note + ext] = [-1, fret, fret + 2, fret + 2, -1, -1];
+            }
         } else {
-            // NORMALE AKKORDE: Alte Logik beibehalten
+            // Standard-Akkorde
             let eS = [...(baseShapes['E' + ext] || baseShapes['E'])];
             let aS = [...(baseShapes['A' + ext] || baseShapes['A'])];
-            
             const ePattern = eS.map(f => f === -1 ? -1 : f + i);
             let aDist = (i >= 5) ? (i - 5) : (i + 7);
             const aPattern = aS.map(f => f === -1 ? -1 : f + aDist);
-            
-            if (i <= 4) {
-                patterns[note + ext] = ePattern;
-            } else {
-                patterns[note + ext] = aPattern;
-            }
+            patterns[note + ext] = (i <= 4) ? ePattern : aPattern;
         }
     });
 });
