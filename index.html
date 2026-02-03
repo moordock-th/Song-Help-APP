@@ -47,7 +47,7 @@
 
 <div class="container">
     <div style="padding: 10px 0; color: var(--primary); font-size: 0.9rem; font-weight: bold;" class="no-print">
-        Song-Helper App Pro - Powered by Gemini
+        Song-Helper App Pro - Fixed Powerchords
     </div>
 
     <div class="header-ui no-print">
@@ -111,25 +111,22 @@ const patterns = {};
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
         let pattern;
-        // i ist der Index in der chromatischen Skala ab E
         if (i <= 4) { // E bis G# -> E-Saiten-Form
             let shape = baseShapes[ext] || baseShapes[''];
             pattern = shape.map(f => f === -1 ? -1 : f + i);
         } else { // A bis D# -> A-Saiten-Form
-            let dist = (i - 5); // Abstand von A (Index 5)
+            let dist = (i - 5); 
             let aShape;
             if (ext === '5') aShape = [-1,0,2,2,-1,-1];
             else if (ext === 'm') aShape = [-1,0,2,2,1,0];
             else if (ext === '7') aShape = [-1,0,2,0,2,0];
             else aShape = [-1,0,2,2,2,0];
-            
             pattern = aShape.map(f => f === -1 ? -1 : f + dist);
         }
         patterns[note + ext] = pattern;
     });
 });
 
-// Aliasse (Bb, Eb etc.) hinzufügen
 Object.keys(altNames).forEach(alt => {
     const orig = altNames[alt];
     ['','m','7','maj7','5','sus4','sus2'].forEach(ext => {
@@ -137,7 +134,7 @@ Object.keys(altNames).forEach(alt => {
     });
 });
 
-// MANUELLE KORREKTUREN (Für offene Griffe in der 1. Position)
+// MANUELLE KORREKTUREN
 patterns['C'] = [-1,3,2,0,1,0]; 
 patterns['D'] = [-1,-1,0,2,3,2]; 
 patterns['G'] = [3,2,0,0,0,3];
@@ -147,16 +144,13 @@ patterns['F'] = [1,3,3,2,1,1];
 patterns['Am'] = [-1,0,2,2,1,0];
 patterns['Em'] = [0,2,2,0,0,0];
 patterns['Dm'] = [-1,-1,0,2,3,1];
-// Powerchords offen
 patterns['A5'] = [-1,0,2,2,-1,-1];
 patterns['E5'] = [0,2,2,-1,-1,-1];
 patterns['D5'] = [-1,-1,0,2,3,-1];
 
-// --- HILFSFUNKTIONEN ---
 function isChord(word) {
     const clean = word.replace(/[()\[\]]/g, '').trim();
     if (!clean) return false;
-    // Erster Buchstabe muss eine Note sein
     const firstChar = clean.charAt(0).toUpperCase();
     if (!['A','B','C','D','E','F','G','H'].includes(firstChar)) return false;
     return /^[a-hA-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim|5)?$/i.test(clean);
@@ -167,24 +161,15 @@ function createSvg(frets) {
     const tuning = tuningOffsets[tuningKey];
     const adj = frets.map((f, i) => (f <= 0) ? f : f - tuning[i]);
     
-    // Dynamische Bund-Positionierung
     const pressed = adj.filter(f => f > 0);
     const minFret = pressed.length > 0 ? Math.min(...pressed) : 0;
-    const maxFretInPattern = Math.max(...adj);
-    
-    // Offset berechnen: Wenn ein Finger höher als Bund 2 liegt, verschieben wir die Ansicht
     const offset = (minFret > 2) ? minFret : 0;
 
     let svg = `<svg viewBox="0 0 100 120">`;
-    // Sattel (dicke Linie), nur wenn wir in der 1. Position sind
     svg += `<line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="${offset === 0 ? 3 : 1}"/>`;
-    
-    // 6 Saiten
     for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
-    // 5 Bundstäbe (für das 4-Bund-Fenster)
     for(let i=0; i<5; i++) svg += `<line x1="10" y1="${20+i*20}" x2="90" y2="${20+i*20}" stroke="#ccc"/>`;
     
-    // Bundzahl anzeigen
     if (offset > 0) svg += `<text x="92" y="38" font-size="12" font-weight="bold" fill="#0284c7">${offset}fr</text>`;
 
     adj.forEach((f, s) => {
@@ -192,7 +177,6 @@ function createSvg(frets) {
             svg += `<circle cx="${10+s*16}" cy="12" r="4" fill="none" stroke="green" stroke-width="1.5"/>`;
         } else if(f > 0) {
             let relFret = f - offset + 1;
-            // Falls der Akkord über das 4-Bund-Fenster hinausgeht (selten bei Powerchords)
             if (relFret > 0 && relFret <= 4) {
                 svg += `<circle cx="${10+s*16}" cy="${20 + (relFret * 20) - 10}" r="6" fill="#1e293b"/>`;
             }
@@ -218,33 +202,7 @@ function render() {
     input.split('\n').forEach(line => {
         const lineDiv = document.createElement('div');
         lineDiv.className = 'song-line';
-        
-        // Prüfen, ob die Zeile nur aus Akkorden besteht
         const words = line.trim().split(/\s+/);
         const isOnlyChords = words.length > 0 && words.every(w => isChord(w));
         
-        line.split(/(\s+)/).forEach(word => {
-            if (isChord(word)) {
-                let c = word.trim();
-                // Normalisierung: H -> B für die Bibliothek, aber Anzeige bleibt
-                let lookup = c.replace('H', 'B');
-                // Ersten Buchstaben groß
-                lookup = lookup.charAt(0).toUpperCase() + lookup.slice(1);
-                
-                if (patterns[lookup]) {
-                    found.add(lookup);
-                    lineDiv.innerHTML += `<span class="chord-wrap"><span class="chord-label">${c}</span>${isOnlyChords ? '&nbsp;&nbsp;&nbsp;&nbsp;' : word}</span>`;
-                } else {
-                    lineDiv.innerHTML += `<span>${word}</span>`;
-                }
-            } else {
-                lineDiv.innerHTML += `<span>${word.replace(/ /g, '&nbsp;')}</span>`;
-            }
-        });
-        outContent.appendChild(lineDiv);
-    });
-
-    // Fußzeile mit Diagrammen
-    Array.from(found).sort().forEach(c => {
-        if(patterns[c]) {
-            outChords.innerHTML +=
+        line.split(/(\s+)/).
