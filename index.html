@@ -220,13 +220,15 @@ function render() {
         outContent.appendChild(lineDiv);
     });
 
-    found.forEach(c => {
-        let normalized = c.charAt(0).toUpperCase() + c.slice(1);
-        if (c.toLowerCase().endsWith('5')) normalized = c.charAt(0).toUpperCase() + '5';
+found.forEach(c => {
+        // Macht aus a#5 -> A#5 (behält das Kreuz bei!)
+        let normalized = c.toUpperCase(); 
+        
         if(patterns[normalized]) {
             outChords.innerHTML += `<div class="chord-item"><b>${normalized}</b><br>${createSvg(patterns[normalized])}</div>`;
         }
     });
+    
 }
 window.onload = render;
     function toggleLibrary() {
