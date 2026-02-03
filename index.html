@@ -121,20 +121,29 @@ const baseShapes = {
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
-// 1. Mathematische Generierung & Rock-Logik (inkl. sus2)
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
-        const eShape = baseShapes['E' + (ext || '')] || (ext === 'sus2' ? baseShapes['Esus2'] : baseShapes['E5']);
+        // Powerchord-Logik: Nutze E5/A5 Shapes, wenn ext '5' ist
+        let eShape = baseShapes['E' + ext];
+        let aShape = baseShapes['A' + ext];
+
+        // Fallback für sus-Akkorde, falls das spezifische Shape fehlt
+        if (!eShape && ext === 'sus2') eShape = baseShapes['Esus2'];
+        if (!aShape && ext === 'sus2') aShape = baseShapes['Asus2'];
+        
+        // Genereller Fallback auf Powerchord-Shape für '5'
+        if (!eShape && ext === '5') eShape = baseShapes['E5'];
+        if (!aShape && ext === '5') aShape = baseShapes['A5'];
+
         const ePattern = eShape.map(f => f === -1 ? -1 : f + i);
         let aDist = (i >= 5) ? (i - 5) : (i + 7);
-        const aShape = baseShapes['A' + (ext || '')] || (ext === 'sus2' ? baseShapes['Asus2'] : baseShapes['A5']);
         const aPattern = aShape.map(f => f === -1 ? -1 : f + aDist);
 
         const eMin = Math.min(...ePattern.filter(f => f > 0)) || 99;
         const aMin = Math.min(...aPattern.filter(f => f > 0)) || 99;
+
+        // Speichere das Pattern
         patterns[note + ext] = (aMin < eMin) ? aPattern : ePattern;
-        
-        if (ext === '') patterns[note + '5'] = (aMin < eMin) ? aPattern.map((f,idx) => idx > 3 ? -1 : f) : ePattern.map((f,idx) => idx > 3 ? -1 : f);
     });
 });
 
