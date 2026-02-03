@@ -1,9 +1,9 @@
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChordStudio Pro v4 - Songwriter & Translator</title>
+    <title>ChordStudio Pro v4 - Intelligent Recognition</title>
     <style>
         :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
@@ -20,33 +20,26 @@
         .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         @media (max-width: 900px) { .app-grid { grid-template-columns: 1fr; } }
 
-        /* Translator Box */
-        .translator-section { background: #1e293b; padding: 15px; border-radius: 12px; margin-top: 20px; border: 1px dashed var(--primary); }
-        .translation-res { background: #0f172a; padding: 10px; border-radius: 6px; margin-top: 10px; min-height: 50px; font-style: italic; color: #cbd5e1; }
-
-        /* Vorschau / Druck-Layout */
         .preview-box { background: white; color: #1e293b; padding: 40px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); min-height: 600px; }
         .song-header { border-bottom: 3px solid #38bdf8; margin-bottom: 20px; padding-bottom: 10px; }
         .song-title { font-size: 28px; font-weight: 900; margin: 0; }
         .meta-info { font-size: 14px; color: #64748b; margin-top: 5px; }
 
-        .song-line { display: flex; flex-wrap: wrap; line-height: 3; margin-bottom: 5px; min-height: 1.5em; }
-        .chord-wrap { position: relative; margin-right: 4px; }
-        .chord-label { position: absolute; top: -1.6em; left: 0; font-weight: bold; color: #0284c7; font-size: 15px; white-space: nowrap; }
+        .song-line { display: flex; flex-wrap: wrap; line-height: 2.5; margin-bottom: 10px; min-height: 1.2em; position: relative; }
+        .chord-wrap { position: relative; display: inline-block; margin-right: 6px; }
+        .chord-label { position: absolute; top: -1.2em; left: 0; font-weight: bold; color: #0284c7; font-size: 14px; }
 
         .chord-footer { margin-top: 50px; display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
-        .chord-item { text-align: center; font-size: 11px; }
-        svg { width: 80px; height: 100px; }
+        .chord-item { text-align: center; font-size: 11px; color: #1e293b; }
+        svg { width: 70px; height: 90px; }
 
         .btn { background: var(--primary); color: #0f172a; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn:hover { background: white; }
-        .btn-translate { background: #10b981; color: white; margin-top: 10px; }
 
         @media print {
             .no-print { display: none !important; }
             body { background: white; }
             .preview-box { box-shadow: none; padding: 0; }
-            .container { max-width: 100%; padding: 0; }
         }
     </style>
 </head>
@@ -56,40 +49,25 @@
     <div class="header-ui no-print">
         <div class="input-group">
             <label>Song Titel</label>
-            <input type="text" id="titleIn" placeholder="z.B. Yesterday" oninput="render()">
+            <input type="text" id="titleIn" placeholder="z.B. Wonderwall" oninput="render()">
         </div>
         <div class="input-group">
             <label>Tonart</label>
-            <input type="text" id="keyIn" placeholder="z.B. F-Dur" oninput="render()">
-        </div>
-        <div class="input-group">
-            <label>Stimmung</label>
-            <select id="tuningIn" onchange="render()">
-                <option value="Standard">Standard (EADGBE)</option>
-                <option value="Eb">Eb Tuning</option>
-                <option value="DropD">Drop D</option>
-            </select>
+            <input type="text" id="keyIn" placeholder="z.B. G-Dur" oninput="render()">
         </div>
         <button class="btn" onclick="window.print()">🖨️ PDF / DRUCKEN</button>
     </div>
 
     <div class="app-grid">
         <div class="no-print">
-            <label>Editor (Akkorde in Zeilen oder [C] Klammern)</label>
-            <textarea id="editor" oninput="render()" placeholder="[G] Somewhere [D] over the rainbow..."></textarea>
-            
-            <div class="translator-section">
-                <label>🌍 Songtext-Übersetzer (EN -> DE)</label>
-                <textarea id="transIn" style="height: 100px; margin-top:5px;" placeholder="Hier englischen Text zum Übersetzen einfügen..."></textarea>
-                <button class="btn btn-translate" onclick="translateNow()">Text übersetzen</button>
-                <div id="transOut" class="translation-res">Die Übersetzung erscheint hier...</div>
-            </div>
+            <label>Editor (Akkorde einfach reinschreiben)</label>
+            <textarea id="editor" oninput="render()" placeholder="Em7 G D A7&#10;Today is gonna be the day..."></textarea>
         </div>
 
         <div class="preview-box" id="preview">
             <div class="song-header">
                 <h1 class="song-title" id="outTitle">Titel</h1>
-                <div class="meta-info" id="outMeta">Key: - | Tuning: -</div>
+                <div class="meta-info" id="outMeta">Key: -</div>
             </div>
             <div id="outContent"></div>
             <div class="chord-footer" id="outChords"></div>
@@ -99,107 +77,78 @@
 
 <script>
 const patterns = {
-        // C-Reihe
-        'C': [-1,3,2,0,1,0], 'Cm': [-1,3,5,5,4,3], 'C7': [-1,3,2,3,1,0], 'Cmaj7': [-1,3,2,0,0,0], 'Csus2': [-1,3,0,0,3,3], 'Csus4': [-1,3,3,0,1,1], 'Cadd9': [-1,3,2,0,3,0], 'C#m': [-1,4,6,6,5,4],
-        // D-Reihe
-        'D': [-1,-1,0,2,3,2], 'Dm': [-1,-1,0,2,3,1], 'D7': [-1,-1,0,2,1,2], 'Dmaj7': [-1,-1,0,2,2,2], 'Dsus2': [-1,-1,0,2,3,0], 'Dsus4': [-1,-1,0,2,3,3], 'Dadd9': [-1,5,4,0,3,0],
-        // E-Reihe
-        'E': [0,2,2,1,0,0], 'Em': [0,2,2,0,0,0], 'E7': [0,2,0,1,0,0], 'Emaj7': [0,2,1,1,0,0], 'Esus4': [0,2,2,2,0,0], 'Eadd9': [0,2,4,1,0,0],
-        // F-Reihe
-        'F': [1,3,3,2,1,1], 'Fm': [1,3,3,1,1,1], 'F7': [1,3,1,2,1,1], 'Fmaj7': [-1,-1,3,2,1,0], 'Fsus2': [1,3,3,0,1,1], 'F#m': [2,4,4,2,2,2],
-        // G-Reihe
-        'G': [3,2,0,0,0,3], 'Gm': [3,5,5,3,3,3], 'G7': [3,2,0,0,0,1], 'Gmaj7': [3,2,0,0,0,2], 'Gsus2': [3,0,0,0,3,3], 'Gsus4': [3,3,0,0,3,3], 'Gadd9': [3,2,0,2,0,3],
-        // A-Reihe
-        'A': [-1,0,2,2,2,0], 'Am': [-1,0,2,2,1,0], 'A7': [-1,0,2,0,2,0], 'Amaj7': [-1,0,2,1,2,0], 'Asus2': [-1,0,2,2,0,0], 'Asus4': [-1,0,2,2,3,0], 'Aadd9': [-1,0,7,6,0,0],
-        // H / B-Reihe
-        'H': [-1,2,4,4,4,2], 'Hm': [-1,2,4,4,3,2], 'H7': [-1,2,1,2,0,2], 'Bb': [-1,1,3,3,3,1], 'B': [-1,1,3,3,3,1], 'Bm': [-1,1,3,3,2,1], 'Bmaj7': [-1,1,3,2,3,1]
-   // Powerchords (5er)
-        'C5': [-1,3,5,5,-1,-1], 'D5': [-1,-1,0,2,3,-1], 'E5': [0,2,2,-1,-1,-1], 
-        'F5': [1,3,3,-1,-1,-1], 'G5': [3,5,5,-1,-1,-1], 'A5': [-1,0,2,2,-1,-1], 'B5': [-1,2,4,4,-1,-1], 'H5': [-1,2,4,4,-1,-1]
-    };
-
-    function createSvg(frets) {
-        let svg = `<svg viewBox="0 0 100 120"><line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="3"/>`;
-        for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
-        for(let i=0; i<5; i++) svg += `<line x1="10" y1="${20+i*20}" x2="90" y2="${20+i*20}" stroke="#ccc"/>`;
-        frets.forEach((f, s) => {
-            if(f === 0) svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
-            else if(f > 0) svg += `<circle cx="${10+s*16}" cy="${20+f*20-10}" r="6" fill="black"/>`;
-            else if(f === -1) svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
-        });
-        return svg + `</svg>`;
-    }
-
-    async function translateNow() {
-        const text = document.getElementById('transIn').value;
-        const out = document.getElementById('transOut');
-        if(!text) return;
-        out.innerText = "Wird übersetzt...";
-        try {
-            const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|de`);
-            const data = await res.json();
-            out.innerText = data.responseData.translatedText;
-        } catch(e) { out.innerText = "Fehler bei der Verbindung."; }
-    }
+    'C': [-1,3,2,0,1,0], 'Cm': [-1,3,5,5,4,3], 'C7': [-1,3,2,3,1,0], 'Cmaj7': [-1,3,2,0,0,0], 'Csus2': [-1,3,0,0,3,3], 'Csus4': [-1,3,3,0,1,1], 'Cadd9': [-1,3,2,0,3,0],
+    'D': [-1,-1,0,2,3,2], 'Dm': [-1,-1,0,2,3,1], 'D7': [-1,-1,0,2,1,2], 'Dmaj7': [-1,-1,0,2,2,2], 'Dsus2': [-1,-1,0,2,3,0], 'Dsus4': [-1,-1,0,2,3,3], 'Dadd9': [-1,5,4,0,3,0],
+    'E': [0,2,2,1,0,0], 'Em': [0,2,2,0,0,0], 'E7': [0,2,0,1,0,0], 'Emaj7': [0,2,1,1,0,0], 'Esus4': [0,2,2,2,0,0], 'Eadd9': [0,2,4,1,0,0],
+    'F': [1,3,3,2,1,1], 'Fm': [1,3,3,1,1,1], 'F7': [1,3,1,2,1,1], 'Fmaj7': [-1,-1,3,2,1,0],
+    'G': [3,2,0,0,0,3], 'Gm': [3,5,5,3,3,3], 'G7': [3,2,0,0,0,1], 'Gmaj7': [3,2,0,0,0,2], 'Gsus4': [3,3,0,0,3,3], 'Gadd9': [3,2,0,2,0,3],
+    'A': [-1,0,2,2,2,0], 'Am': [-1,0,2,2,1,0], 'A7': [-1,0,2,0,2,0], 'Amaj7': [-1,0,2,1,2,0], 'Asus2': [-1,0,2,2,0,0], 'Asus4': [-1,0,2,2,3,0],
+    'H': [-1,2,4,4,4,2], 'Hm': [-1,2,4,4,3,2], 'H7': [-1,2,1,2,0,2], 'B': [-1,1,3,3,3,1], 'Bm': [-1,1,3,3,2,1],
+    'C5': [-1,3,5,5,-1,-1], 'D5': [-1,-1,0,2,3,-1], 'E5': [0,2,2,-1,-1,-1], 'F5': [1,3,3,-1,-1,-1], 'G5': [3,5,5,-1,-1,-1], 'A5': [-1,0,2,2,-1,-1], 'H5': [-1,2,4,4,-1,-1]
+};
 
 function isChord(word) {
-        const clean = word.replace(/[()\[\]]/g, '');
-        // Erlaubt A-G (und H), b/#, sowie Erweiterungen wie m, 7, maj7, sus und jetzt auch 5 für Powerchords
-        const chordRegex = /^[a-hA-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim|5)?$/i;
-        return chordRegex.test(clean);
-    }
+    const clean = word.replace(/[()\[\]]/g, '').trim();
+    if (!clean) return false;
+    const chordRegex = /^[a-hA-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim|5)?$/i;
+    return chordRegex.test(clean);
+}
 
-    function render() {
-        const input = document.getElementById('editor').value;
-        const outContent = document.getElementById('outContent');
-        const outChords = document.getElementById('outChords');
-        const found = new Set();
+function createSvg(frets) {
+    let svg = `<svg viewBox="0 0 100 120"><line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="3"/>`;
+    for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
+    for(let i=0; i<5; i++) svg += `<line x1="10" y1="${20+i*20}" x2="90" y2="${20+i*20}" stroke="#ccc"/>`;
+    frets.forEach((f, s) => {
+        if(f === 0) svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
+        else if(f > 0) svg += `<circle cx="${10+s*16}" cy="${20+f*20-10}" r="5" fill="black"/>`;
+        else if(f === -1) svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
+    });
+    return svg + `</svg>`;
+}
+
+function render() {
+    const input = document.getElementById('editor').value;
+    const outContent = document.getElementById('outContent');
+    const outChords = document.getElementById('outChords');
+    const found = new Set();
+    
+    document.getElementById('outTitle').innerText = document.getElementById('titleIn').value || 'Mein Song';
+    document.getElementById('outMeta').innerText = `Key: ${document.getElementById('keyIn').value}`;
+
+    outContent.innerHTML = '';
+    outChords.innerHTML = '';
+
+    input.split('\n').forEach(line => {
+        const lineDiv = document.createElement('div');
+        lineDiv.className = 'song-line';
         
-        document.getElementById('outTitle').innerText = document.getElementById('titleIn').value || 'Unbenannter Song';
-        document.getElementById('outMeta').innerText = `Key: ${document.getElementById('keyIn').value} | Tuning: ${document.getElementById('tuningIn').value}`;
+        const words = line.split(/(\s+)/); // Behält Leerzeichen bei
+        
+        // Prüfen ob die ganze Zeile überwiegend aus Akkorden besteht
+        const onlyChords = line.trim().split(/\s+/).every(w => isChord(w));
 
-        outContent.innerHTML = '';
-        outChords.innerHTML = '';
-
-        input.split('\n').forEach(line => {
-            const lineDiv = document.createElement('div');
-            lineDiv.className = 'song-line';
-            const words = line.trim().split(/\s+/);
-            const isChordLine = words.length > 0 && words.every(w => isChord(w));
-
-            if (isChordLine && line.trim() !== "") {
-                let formattedLine = line.replace(/(\S+)/g, (match) => {
-                    let c = match.replace(/[\[\]]/g, '');
-                    found.add(c);
-                    return `<span class="chord-wrap"><span class="chord-label">${c}</span>&nbsp;</span>`;
-                });
-                lineDiv.innerHTML = formattedLine;
-            } else if (line.includes('[')) {
-                lineDiv.innerHTML = line.replace(/\[([^\]]+)\]([^\[]*)/g, (m, c, t) => {
-                    found.add(c);
-                    return `<span class="chord-wrap"><span class="chord-label">${c}</span><span>${t.replace(/ /g, '&nbsp;')}</span></span>`;
-                });
+        words.forEach(word => {
+            if (isChord(word)) {
+                let cleanChord = word.trim();
+                found.add(cleanChord);
+                lineDiv.innerHTML += `<span class="chord-wrap"><span class="chord-label">${cleanChord}</span>${onlyChords ? '&nbsp;&nbsp;&nbsp;' : word}</span>`;
             } else {
-                lineDiv.innerText = line || ' ';
-            }
-            outContent.appendChild(lineDiv);
-        });
-
-found.forEach(c => {
-            // Normalisierung: Erster Buchstabe groß, Rest klein (aus c5 wird C5, aus am wird Am)
-            let normalized = c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
-            
-            // Spezialfall für Powerchords: Das '5' soll groß bleiben/erkannt werden
-            if (c.toLowerCase().endsWith('5')) {
-                normalized = c.charAt(0).toUpperCase() + '5';
-            }
-
-            if(patterns[normalized]) {
-                outChords.innerHTML += `<div class="chord-item"><b>${normalized}</b><br>${createSvg(patterns[normalized])}</div>`;
+                lineDiv.innerHTML += `<span>${word.replace(/ /g, '&nbsp;')}</span>`;
             }
         });
-    }
-    window.onload = render;
+
+        outContent.appendChild(lineDiv);
+    });
+
+    found.forEach(c => {
+        let normalized = c.charAt(0).toUpperCase() + c.slice(1);
+        if (c.toLowerCase().endsWith('5')) normalized = c.charAt(0).toUpperCase() + '5';
+        if(patterns[normalized]) {
+            outChords.innerHTML += `<div class="chord-item"><b>${normalized}</b><br>${createSvg(patterns[normalized])}</div>`;
+        }
+    });
+}
+window.onload = render;
 </script>
 </body>
-</html>
+</html>      
