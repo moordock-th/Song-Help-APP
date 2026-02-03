@@ -109,49 +109,87 @@ const baseShapes = {
     'A5': [-1,0,2,2,-1,-1], 'Asus2': [-1,0,2,2,0,0], 'Asus4': [-1,0,2,2,3,0], 'Aadd9': [-1,0,2,4,2,0]
 };
 
+// Vollständige chromatische Tonleiter
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
-// Generierung aller Akkorde
+// ========== POWERCHORD LOGIK ==========
+// Funktion zur Berechnung der optimalen Powerchord-Position
+function getPowerchordPattern(noteIndex) {
+    // E-Form Powerchord: E-Saite (Index 0), A-Saite (Index 1), D-Saite (Index 2)
+    // A-Form Powerchord: A-Saite (Index 1), D-Saite (Index 2), G-Saite (Index 3)
+    
+    const eFormBase = [0, 2, 2, -1, -1, -1];  // Grundton auf E-Saite
+    const aFormBase = [-1, 0, 2, 2, -1, -1];  // Grundton auf A-Saite
+    
+    // Entscheidungslogik: Welche Form ist ergonomischer?
+    // E-Form für: E(0), F(1), F#(2), G(3), G#(4) - Bünde 0-4 auf E-Saite
+    // A-Form für: A(5), A#(6), B(7), C(8), C#(9), D(10), D#(11) - niedrigere Bünde auf A-Saite
+    
+    if (noteIndex <= 4) {
+        // E-Form: Füge noteIndex zu allen gegriffenen Bünden hinzu
+        return eFormBase.map(fret => fret === -1 ? -1 : fret + noteIndex);
+    } else {
+        // A-Form: Berechne Distanz von A(5) aus
+        const distanceFromA = noteIndex - 5;
+        return aFormBase.map(fret => fret === -1 ? -1 : fret + distanceFromA);
+    }
+}
+
+// ========== GENERIERUNG ALLER AKKORDE ==========
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
-        // Grund-Shapes laden
-        let eS = [...(baseShapes['E' + ext] || baseShapes['E'])];
-        let aS = [...(baseShapes['A' + ext] || baseShapes['A'])];
-
-        // POWERCHORD-FIX: Erzwinge exakt 3 Saiten (Grundton, Quinte, Oktave)
         if (ext === '5') {
-            eS = [0, 2, 2, -1, -1, -1];  // E-Form: E-Saite (Grundton), A-Saite (Quinte), D-Saite (Oktave)
-            aS = [-1, 0, 2, 2, -1, -1];  // A-Form: A-Saite (Grundton), D-Saite (Quinte), G-Saite (Oktave)
-        }
-
-        const ePattern = eS.map(f => f === -1 ? -1 : f + i);
-        let aDist = (i >= 5) ? (i - 5) : (i + 7);
-        const aPattern = aS.map(f => f === -1 ? -1 : f + aDist);
-
-        // STRENGE LAGE-LOGIK: 
-        // E, F, F#, G, G# (Index 0-4) immer auf tiefe E-Saite
-        // A bis D# (Index 5-11) immer auf A-Saite
-        if (i <= 4) {
-            patterns[note + ext] = ePattern;
+            // POWERCHORD: Verwende optimierte Logik
+            patterns[note + ext] = getPowerchordPattern(i);
         } else {
-            patterns[note + ext] = aPattern;
+            // NORMALE AKKORDE: Alte Logik beibehalten
+            let eS = [...(baseShapes['E' + ext] || baseShapes['E'])];
+            let aS = [...(baseShapes['A' + ext] || baseShapes['A'])];
+            
+            const ePattern = eS.map(f => f === -1 ? -1 : f + i);
+            let aDist = (i >= 5) ? (i - 5) : (i + 7);
+            const aPattern = aS.map(f => f === -1 ? -1 : f + aDist);
+            
+            if (i <= 4) {
+                patterns[note + ext] = ePattern;
+            } else {
+                patterns[note + ext] = aPattern;
+            }
         }
     });
 });
 
-// Aliasse für Bb, Eb, H etc.
-const altNames = {'A#':'Bb','Bb':'A#','C#':'Db','Db':'C#','D#':'Eb','Eb':'D#','F#':'Gb','Gb':'F#','G#':'Ab','Ab':'G#','B':'H','H':'B'};
+// ========== ALIASSE & ALTERNATIVE SCHREIBWEISEN ==========
+// Bb, Eb, Db, Gb, Ab + H (deutsche Notation für B)
+const altNames = {
+    'A#':'Bb', 'Bb':'A#',
+    'C#':'Db', 'Db':'C#',
+    'D#':'Eb', 'Eb':'D#',
+    'F#':'Gb', 'Gb':'F#',
+    'G#':'Ab', 'Ab':'G#',
+    'B':'H', 'H':'B'
+};
+
 Object.keys(altNames).forEach(root => {
     const alias = altNames[root];
     ['','m','7','maj7','5','sus4','sus2'].forEach(ext => {
-        if (patterns[root + ext]) patterns[alias + ext] = patterns[root + ext];
+        if (patterns[root + ext]) {
+            patterns[alias + ext] = patterns[root + ext];
+        }
     });
 });
 
-// Spezial-Korrekturen für offene Standard-Akkorde
-patterns['C'] = [-1,3,2,0,1,0]; patterns['D'] = [-1,-1,0,2,3,2]; patterns['G'] = [3,2,0,0,0,3];
-patterns['E'] = [0,2,2,1,0,0]; patterns['A'] = [-1,0,2,2,2,0]; patterns['F'] = [1,3,3,2,1,1];
+// ========== MANUELLE KORREKTUREN FÜR OFFENE AKKORDE ==========
+patterns['C'] = [-1,3,2,0,1,0]; 
+patterns['D'] = [-1,-1,0,2,3,2]; 
+patterns['G'] = [3,2,0,0,0,3];
+patterns['E'] = [0,2,2,1,0,0]; 
+patterns['A'] = [-1,0,2,2,2,0]; 
+patterns['F'] = [1,3,3,2,1,1];
+
+// C5 speziell: 3. Bund A-Saite (da C bei Index 8 ist, ist es A-Form mit Offset 3)
+// Wird automatisch durch getPowerchordPattern(8) korrekt als [-1, 3, 5, 5, -1, -1] generiert
 
 function isChord(word) {
     const clean = word.replace(/[()\[\]]/g, '').trim();
@@ -209,18 +247,38 @@ function toggleLibrary() {
     if (lib.style.display === 'none') {
         lib.style.display = 'grid'; lib.innerHTML = '';
         const all = Object.keys(patterns).sort();
-        const pwr = all.filter(c => c.endsWith('5'));
-        const opn = ['C', 'D', 'E', 'F', 'G', 'A'];
-        const rest = all.filter(c => !c.endsWith('5') && !opn.includes(c));
+        
+        // Sortierung nach Kategorien
+        const powerchords = all.filter(c => c.endsWith('5')).sort((a, b) => {
+            // Sortiere Powerchords chromatisch: E5, F5, F#5, G5...
+            const order = ['E5','F5','F#5','Gb5','G5','G#5','Ab5','A5','A#5','Bb5','B5','H5','C5','C#5','Db5','D5','D#5','Eb5'];
+            return order.indexOf(a) - order.indexOf(b);
+        });
+        
+        const openChords = ['C', 'D', 'E', 'F', 'G', 'A'];
+        const rest = all.filter(c => !c.endsWith('5') && !openChords.includes(c));
+        
         const createSection = (title, list) => {
             if(!list.length) return '';
             let h = `<div style="grid-column: 1/-1; margin-top:20px; border-bottom:1px solid var(--primary); color:var(--primary); font-weight:bold; padding-bottom:5px; text-transform:uppercase; font-size:0.8rem;">${title}</div>`;
-            list.forEach(c => { if(patterns[c]) h += `<div class="chord-item" style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155;"><b style="color:white">${c}</b><br>${createSvg(patterns[c])}</div>`; });
+            list.forEach(c => { 
+                if(patterns[c]) {
+                    h += `<div class="chord-item" style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155;">
+                        <b style="color:white">${c}</b><br>${createSvg(patterns[c])}
+                    </div>`; 
+                }
+            });
             return h;
         };
-        lib.innerHTML += createSection('🔥 Powerchords (Rock)', pwr) + createSection('🎸 Open Chords (Dur)', opn) + createSection('📚 Weitere Akkorde', rest);
-    } else lib.style.display = 'none';
+        
+        lib.innerHTML += createSection('🔥 Powerchords (Rock)', powerchords) + 
+                         createSection('🎸 Open Chords (Dur)', openChords) + 
+                         createSection('📚 Weitere Akkorde', rest);
+    } else {
+        lib.style.display = 'none';
+    }
 }
+
 window.onload = render;
 </script>
 </body>
