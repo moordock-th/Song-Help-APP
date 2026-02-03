@@ -107,6 +107,7 @@
     
 
 <script>
+<script>
 const tuningOffsets = {
     'standard': [0, 0, 0, 0, 0, 0],
     'eb': [-1, -1, -1, -1, -1, -1],
@@ -121,21 +122,20 @@ const baseShapes = {
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
-// 1. Mathematische Generierung (Powerchords auf E- und A-Saite fixiert)
+// 1. Mathematische Generierung (Powerchords fixiert auf E- und A-Saite)
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
-        let eShape = baseShapes['E' + ext];
-        let aShape = baseShapes['A' + ext];
-        if (!eShape && ext === 'sus2') eShape = baseShapes['Esus2'];
-        if (!aShape && ext === 'sus2') aShape = baseShapes['Asus2'];
-        if (ext === '5') { eShape = baseShapes['E5']; aShape = baseShapes['A5']; }
+        let eS = baseShapes['E' + ext] || (ext === '5' ? baseShapes['E5'] : baseShapes['E']);
+        let aS = baseShapes['A' + ext] || (ext === '5' ? baseShapes['A5'] : baseShapes['A']);
 
-        const ePattern = eShape.map(f => f === -1 ? -1 : f + i);
+        const ePattern = eS.map(f => f === -1 ? -1 : f + i);
         let aDist = (i >= 5) ? (i - 5) : (i + 7);
-        const aPattern = aShape.map(f => f === -1 ? -1 : f + aDist);
+        const aPattern = aS.map(f => f === -1 ? -1 : f + aDist);
 
         const eMin = Math.min(...ePattern.filter(f => f > 0)) || 99;
         const aMin = Math.min(...aPattern.filter(f => f > 0)) || 99;
+
+        // Speichere das Pattern (E- oder A-Lage)
         patterns[note + ext] = (aMin < eMin) ? aPattern : ePattern;
     });
 });
@@ -148,11 +148,14 @@ Object.keys(altNames).forEach(root => {
     });
 });
 
+// Spezial-Korrekturen für offene Akkorde
 patterns['C'] = [-1,3,2,0,1,0]; patterns['D'] = [-1,-1,0,2,3,2]; patterns['G'] = [3,2,0,0,0,3];
 patterns['E'] = [0,2,2,1,0,0]; patterns['A'] = [-1,0,2,2,2,0]; patterns['F'] = [1,3,3,2,1,1];
 
+// WICHTIG: Korrigierte Erkennung für den Editor
 function isChord(word) {
     const clean = word.replace(/[()\[\]]/g, '').trim();
+    // Erkennt jetzt explizit auch die "5" am Ende korrekt
     return /^[a-hA-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim|5)?$/i.test(clean);
 }
 
@@ -185,8 +188,7 @@ function render() {
     outContent.innerHTML = ''; outChords.innerHTML = '';
     const found = new Set();
     input.split('\n').forEach(line => {
-        const lineDiv = document.createElement('div');
-        lineDiv.className = 'song-line';
+        const lineDiv = document.createElement('div'); lineDiv.className = 'song-line';
         const onlyChords = line.trim().split(/\s+/).every(w => isChord(w));
         line.split(/(\s+)/).forEach(word => {
             if (isChord(word)) {
@@ -210,14 +212,14 @@ function toggleLibrary() {
         const all = Object.keys(patterns).sort();
         const pwr = all.filter(c => c.endsWith('5'));
         const opn = ['C','D','E','F','G','A'];
-        const sus = all.filter(c => c.includes('sus2') || c.includes('sus4'));
+        const rest = all.filter(c => !c.endsWith('5') && !opn.includes(c));
         const createSection = (title, list) => {
             if(!list.length) return '';
             let h = `<div style="grid-column: 1/-1; margin-top:20px; border-bottom:1px solid var(--primary); color:var(--primary); font-weight:bold; padding-bottom:5px; text-transform:uppercase; font-size:0.8rem;">${title}</div>`;
             list.forEach(c => { if(patterns[c]) h += `<div class="chord-item" style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155;"><b style="color:white">${c}</b><br>${createSvg(patterns[c])}</div>`; });
             return h;
         };
-        lib.innerHTML += createSection('🔥 Powerchords (Rock)', pwr) + createSection('🎸 Open Chords (Dur)', opn) + createSection('✨ Sus-Akkorde', sus) + createSection('📚 Weitere Akkorde', all.filter(c => !pwr.includes(c) && !opn.includes(c) && !sus.includes(c)));
+        lib.innerHTML += createSection('🔥 Powerchords (Rock)', pwr) + createSection('🎸 Open Chords (Dur)', opn) + createSection('📚 Weitere Akkorde', rest);
     } else lib.style.display = 'none';
 }
 window.onload = render;
