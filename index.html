@@ -120,10 +120,10 @@ notes.forEach((note, i) => {
         let aS = [...(baseShapes['A' + ext] || baseShapes['A'])];
 
         // POWERCHORD-FIX: Erzwinge Grundton, Quinte, Oktave (3 Saiten)
-        if (ext === '5') {
-            eS = [0, 2, 2, -1, -1, -1]; // Shape für E-Saite (z.B. G5: 3-5-5)
-            aS = [-1, 0, 2, 2, -1, -1]; // Shape für A-Saite (z.B. C5: x-3-5-5)
-        }
+   if (ext === '5') {
+    eS = [0, 2, 2, -1, -1, -1]; // Grundton, Quinte, Oktave auf E-Saite
+    aS = [-1, 0, 2, 2, -1, -1]; // Grundton, Quinte, Oktave auf A-Saite
+}
 
         const ePattern = eS.map(f => f === -1 ? -1 : f + i);
         let aDist = (i >= 5) ? (i - 5) : (i + 7);
