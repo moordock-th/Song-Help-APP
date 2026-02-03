@@ -119,10 +119,23 @@ notes.forEach((note, i) => {
         let eS = [...(baseShapes['E' + ext] || baseShapes['E'])];
         let aS = [...(baseShapes['A' + ext] || baseShapes['A'])];
 
-        // POWERCHORD-FIX: Erzwinge Grundton, Quinte, Oktave (3 Saiten)
-   if (ext === '5') {
-    eS = [0, 2, 2, -1, -1, -1]; // Grundton, Quinte, Oktave auf E-Saite
-    aS = [-1, 0, 2, 2, -1, -1]; // Grundton, Quinte, Oktave auf A-Saite
+// POWERCHORD-FIX: Erzwinge Grundton, Quinte, Oktave (3 Saiten)
+if (ext === '5') {
+    eS = [0, 2, 2, -1, -1, -1]; 
+    aS = [-1, 0, 2, 2, -1, -1];
+}
+
+const ePattern = eS.map(f => f === -1 ? -1 : f + i);
+let aDist = (i >= 5) ? (i - 5) : (i + 7);
+const aPattern = aS.map(f => f === -1 ? -1 : f + aDist);
+
+// STRENGE LAGE-LOGIK statt mathematischem Vergleich:
+// E, F, F#, G, G# (Index 0-4) MÜSSEN auf die E-Saite
+// Das verhindert, dass F5 in den 8. Bund rutscht.
+if (i <= 4) {
+    patterns[note + ext] = ePattern;
+} else {
+    patterns[note + ext] = aPattern;
 }
 
         const ePattern = eS.map(f => f === -1 ? -1 : f + i);
