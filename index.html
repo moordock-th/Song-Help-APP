@@ -121,32 +121,36 @@ const baseShapes = {
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
+// 1. Mathematische Generierung & Rock-Logik (Powerchords auf E- und A-Saite fixiert)
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
-        // Powerchord-Logik: Nutze E5/A5 Shapes, wenn ext '5' ist
         let eShape = baseShapes['E' + ext];
         let aShape = baseShapes['A' + ext];
 
-        // Fallback für sus-Akkorde, falls das spezifische Shape fehlt
+        // Fallbacks für sus-Akkorde
         if (!eShape && ext === 'sus2') eShape = baseShapes['Esus2'];
         if (!aShape && ext === 'sus2') aShape = baseShapes['Asus2'];
         
-        // Genereller Fallback auf Powerchord-Shape für '5'
-        if (!eShape && ext === '5') eShape = baseShapes['E5'];
-        if (!aShape && ext === '5') aShape = baseShapes['A5'];
+        // WICHTIG: Sicherstellen, dass für '5' immer das volle Powerchord-Shape genutzt wird
+        if (ext === '5') {
+            eShape = baseShapes['E5'];
+            aShape = baseShapes['A5'];
+        }
 
         const ePattern = eShape.map(f => f === -1 ? -1 : f + i);
         let aDist = (i >= 5) ? (i - 5) : (i + 7);
+        const aShape = baseShapes['A' + ext] || (ext === '5' ? baseShapes['A5'] : baseShapes['A']);
         const aPattern = aShape.map(f => f === -1 ? -1 : f + aDist);
 
         const eMin = Math.min(...ePattern.filter(f => f > 0)) || 99;
         const aMin = Math.min(...aPattern.filter(f => f > 0)) || 99;
 
-        // Speichere das Pattern
+        // Speichere das Pattern: Wählt automatisch die Lage (E- oder A-Saite), die näher am Sattel ist
         patterns[note + ext] = (aMin < eMin) ? aPattern : ePattern;
     });
 });
 
+// Alias-Namen (Mapping für Bb, Eb, H etc.)
 const altNames = {'A#':'Bb','Bb':'A#','C#':'Db','Db':'C#','D#':'Eb','Eb':'D#','F#':'Gb','Gb':'F#','G#':'Ab','Ab':'G#','B':'H','H':'B'};
 Object.keys(altNames).forEach(root => {
     const alias = altNames[root];
@@ -155,9 +159,14 @@ Object.keys(altNames).forEach(root => {
     });
 });
 
-// Spezial-Korrekturen (Open Dur Chords)
-patterns['C'] = [-1,3,2,0,1,0]; patterns['D'] = [-1,-1,0,2,3,2]; patterns['G'] = [3,2,0,0,0,3];
-patterns['E'] = [0,2,2,1,0,0]; patterns['A'] = [-1,0,2,2,2,0]; patterns['F'] = [1,3,3,2,1,1];
+// Spezial-Korrekturen für offene Dur-Akkorde (Powerchords werden NICHT überschrieben)
+patterns['C'] = [-1,3,2,0,1,0]; 
+patterns['D'] = [-1,-1,0,2,3,2]; 
+patterns['G'] = [3,2,0,0,0,3];
+patterns['E'] = [0,2,2,1,0,0]; 
+patterns['A'] = [-1,0,2,2,2,0]; 
+patterns['F'] = [1,3,3,2,1,1];
+  
 
 function isChord(word) {
     const clean = word.replace(/[()\[\]]/g, '').trim();
