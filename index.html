@@ -133,10 +133,13 @@ Object.keys(altNames).forEach(root => {
     });
 });
 
-// 3. Spezial-Korrekturen (Nur Dur-Akkorde bleiben offen)
+// 3. Spezial-Korrekturen (Optimierte offene Griffe für die Bibliothek)
 patterns['C'] = [-1,3,2,0,1,0]; 
 patterns['D'] = [-1,-1,0,2,3,2]; 
 patterns['G'] = [3,2,0,0,0,3];
+patterns['E'] = [0,2,2,1,0,0];
+patterns['A'] = [-1,0,2,2,2,0];
+patterns['F'] = [1,3,3,2,1,1]; // Der klassische F-Dur (kleiner Barré/Open-Hybrid)
 
 // Moll-Akkorde werden nun nicht mehr zwangsweise offen dargestellt, 
 // sondern nutzen die Barré-Logik aus Schritt 1.
@@ -237,31 +240,44 @@ function toggleLibrary() {
         lib.style.display = 'grid';
         lib.innerHTML = ''; 
 
+        // Alle verfügbaren Akkord-Namen holen und sortieren
         const allChords = Object.keys(patterns).sort();
-        // Filtert Powerchords für die Top-Sektion
+        
+        // 1. Kategorie: Powerchords (enden auf '5')
         const powerChords = allChords.filter(c => c.endsWith('5'));
-        const openChords = ['C','D','G','Em','Am','Dm'];
+        
+        // 2. Kategorie: Deine gewünschten Open Chords (Dur-Varianten)
+        const openChords = ['C', 'D', 'E', 'F', 'G', 'A']; 
+        
+        // 3. Kategorie: Alles andere (Moll-Barré, 7er, sus-Akkorde etc.)
         const rest = allChords.filter(c => !c.endsWith('5') && !openChords.includes(c));
 
+        // Hilfsfunktion zum Erstellen der Sektionen
         const createSection = (title, list) => {
             if(list.length === 0) return '';
-            let html = `<div style="grid-column: 1/-1; margin-top: 20px; border-bottom: 1px solid var(--primary); color: var(--primary); font-weight: bold; padding-bottom: 5px;">${title}</div>`;
+            let html = `<div style="grid-column: 1/-1; margin-top: 20px; border-bottom: 1px solid var(--primary); color: var(--primary); font-weight: bold; padding-bottom: 5px; text-transform: uppercase; font-size: 0.8rem;">${title}</div>`;
             list.forEach(chord => {
-                html += `
-                    <div class="chord-item" style="background: #0f172a; padding: 10px; border-radius: 8px;">
-                        <b style="color: white">${chord}</b><br>
-                        ${createSvg(patterns[chord])}
-                    </div>`;
+                // Nur hinzufügen, wenn das Muster auch wirklich existiert
+                if (patterns[chord]) {
+                    html += `
+                        <div class="chord-item" style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155;">
+                            <b style="color: white; font-size: 14px;">${chord}</b><br>
+                            ${createSvg(patterns[chord])}
+                        </div>`;
+                }
             });
             return html;
         };
 
-        lib.innerHTML += createSection('🔥 POWERCHORDS (ROCK)', powerChords);
-        lib.innerHTML += createSection('🎸 OPEN CHORDS', openChords);
-        lib.innerHTML += createSection('📚 WEITERE AKKORDE', rest);
+        // Die Sektionen in der gewünschten Reihenfolge zusammenbauen
+        lib.innerHTML += createSection('🔥 Powerchords (Rock)', powerChords);
+        lib.innerHTML += createSection('🎸 Open Chords (Dur)', openChords);
+        lib.innerHTML += createSection('📚 Weitere Akkorde (Barré & Co.)', rest);
+        
     } else {
         lib.style.display = 'none';
     }
+
 
 }</script>
 </body>
