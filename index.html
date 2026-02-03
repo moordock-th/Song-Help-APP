@@ -220,9 +220,10 @@ function render() {
     });
 
 found.forEach(c => {
-        // Macht aus a#5 -> A#5 (behält das Kreuz bei!)
-        let normalized = c.toUpperCase(); 
+        // Verwandelt kleingeschriebene Eingaben (eb5) in korrekte Keys (Eb5)
+        let normalized = c.charAt(0).toUpperCase() + c.slice(1);
         
+        // Prüfe, ob der Akkord in unserer Datenbank existiert
         if(patterns[normalized]) {
             outChords.innerHTML += `<div class="chord-item"><b>${normalized}</b><br>${createSvg(patterns[normalized])}</div>`;
         }
