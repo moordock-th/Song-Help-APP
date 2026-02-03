@@ -93,9 +93,12 @@ const patterns = {};
 // 1. Mathematische Generierung & Rock-Logik
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4'].forEach(ext => {
+        // E-Shape (Grundton auf E-Saite)
         const eShape = baseShapes['E' + (ext || '')] || baseShapes['E5'];
         const ePattern = eShape.map(f => f === -1 ? -1 : f + i);
         
+        // A-Shape (Grundton auf A-Saite)
+        // D# / Eb ist Index 11. 11 - 5 = 6. Bund auf der A-Saite.
         let aDist = (i >= 5) ? (i - 5) : (i + 7);
         const aShape = baseShapes['A' + (ext || '')] || baseShapes['A5'];
         const aPattern = aShape.map(f => f === -1 ? -1 : f + aDist);
@@ -103,6 +106,7 @@ notes.forEach((note, i) => {
         const eMin = Math.min(...ePattern.filter(f => f > 0)) || 99;
         const aMin = Math.min(...aPattern.filter(f => f > 0)) || 99;
 
+        // Wählt die tiefere Lage: Für Eb ist das der 6. Bund (A-Saite) vs 11. Bund (E-Saite)
         patterns[note + ext] = (aMin < eMin) ? aPattern : ePattern;
         
         if (ext === '') {
@@ -110,6 +114,7 @@ notes.forEach((note, i) => {
         }
     });
 });
+    
 
 // 2. Alias-Mapping (Hinzugefügt: Eb -> D#)
 const altNames = {
