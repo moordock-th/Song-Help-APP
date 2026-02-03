@@ -119,14 +119,47 @@ function isChord(word) {
 }
 
 function createSvg(frets) {
-    let svg = `<svg viewBox="0 0 100 120"><line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="3"/>`;
+    // Finde den niedrigsten Bund (ignoriere 0 und -1)
+    const activeFrets = frets.filter(f => f > 0);
+    const minFret = activeFrets.length > 0 ? Math.min(...activeFrets) : 0;
+    
+    // Berechne den Startpunkt des Diagramms (Barree-Logik)
+    // Wenn der Akkord höher als Bund 4 ist, verschieben wir die Ansicht
+    const offset = minFret > 4 ? minFret - 1 : 0;
+
+    let svg = `<svg viewBox="0 0 100 120">`;
+    
+    // Zeichne die Sattellinie (nur wenn wir am 1. Bund sind)
+    const nutWidth = offset === 0 ? 3 : 1;
+    svg += `<line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="${nutWidth}"/>`;
+    
+    // Saiten (6 vertikale Linien)
     for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
+    
+    // Bundstäbe (5 horizontale Linien)
     for(let i=0; i<5; i++) svg += `<line x1="10" y1="${20+i*20}" x2="90" y2="${20+i*20}" stroke="#ccc"/>`;
+    
+    // Bundzahl anzeigen, wenn wir verschoben haben
+    if (offset > 0) {
+        svg += `<text x="92" y="35" font-size="10" fill="gray">${offset}fr</text>`;
+    }
+
     frets.forEach((f, s) => {
-        if(f === 0) svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
-        else if(f > 0) svg += `<circle cx="${10+s*16}" cy="${20+f*20-10}" r="5" fill="black"/>`;
-        else if(f === -1) svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
+        if(f === 0) {
+            // Leersaite (offener Ring oben)
+            svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
+        } else if(f > 0) {
+            // Fingerposition (berechnet relativ zum Offset)
+            const displayFret = f - offset;
+            if (displayFret >= 0 && displayFret <= 5) {
+                svg += `<circle cx="${10+s*16}" cy="${20+displayFret*20-10}" r="5" fill="black"/>`;
+            }
+        } else if(f === -1) {
+            // Saite nicht spielen (X)
+            svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
+        }
     });
+    
     return svg + `</svg>`;
 }
 
