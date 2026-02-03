@@ -139,9 +139,10 @@ const patterns = {
         } catch(e) { out.innerText = "Fehler bei der Verbindung."; }
     }
 
-    function isChord(word) {
+function isChord(word) {
         const clean = word.replace(/[()\[\]]/g, '');
-        const chordRegex = /^[A-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim)?$/i;
+        // Erlaubt A-G (und H), b/#, sowie Erweiterungen wie m, 7, maj7, sus und jetzt auch 5 für Powerchords
+        const chordRegex = /^[a-hA-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim|5)?$/i;
         return chordRegex.test(clean);
     }
 
@@ -181,8 +182,15 @@ const patterns = {
             outContent.appendChild(lineDiv);
         });
 
-        found.forEach(c => {
-            let normalized = c.charAt(0).toUpperCase() + c.slice(1);
+found.forEach(c => {
+            // Normalisierung: Erster Buchstabe groß, Rest klein (aus c5 wird C5, aus am wird Am)
+            let normalized = c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
+            
+            // Spezialfall für Powerchords: Das '5' soll groß bleiben/erkannt werden
+            if (c.toLowerCase().endsWith('5')) {
+                normalized = c.charAt(0).toUpperCase() + '5';
+            }
+
             if(patterns[normalized]) {
                 outChords.innerHTML += `<div class="chord-item"><b>${normalized}</b><br>${createSvg(patterns[normalized])}</div>`;
             }
