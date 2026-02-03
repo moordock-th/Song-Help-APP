@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChordStudio Pro v4 - Intelligent Recognition</title>
+    <title>Song-Helper APP - made bey Superwanze</title>
     <style>
         :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
@@ -104,163 +104,116 @@ const tuningOffsets = {
     'eb': [-1, -1, -1, -1, -1, -1],
     'dropD': [-2, 0, 0, 0, 0, 0]
 };
-    
+
 const baseShapes = {
-    'E': [0,2,2,1,0,0], 'Em': [0,2,2,0,0,0], 'E7': [0,2,0,1,0,0], 'Emaj7': [0,2,1,1,0,0], 'E5': [0,2,2,-1,-1,-1], 'Esus4': [0,2,2,2,0,0],
+    'E': [0,2,2,1,0,0], 'Em': [0,2,2,0,0,0], 'E7': [0,2,0,1,0,0], 'Emaj7': [0,2,1,1,0,0], 'E5': [0,2,2,-1,-1,-1], 'Esus4': [0,2,2,2,0,0], 'Esus2': [0,2,4,4,0,0],
     'A': [-1,0,2,2,2,0], 'Am': [-1,0,2,2,1,0], 'A7': [-1,0,2,0,2,0], 'Amaj7': [-1,0,2,1,2,0], 'A5': [-1,0,2,2,-1,-1], 'Asus2': [-1,0,2,2,0,0], 'Asus4': [-1,0,2,2,3,0], 'Aadd9': [-1,0,2,4,2,0]
 };
 
-// WICHTIG: A# wurde hier explizit hinzugefügt
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
-// 1. Mathematische Generierung & Rock-Logik
+// 1. Mathematische Generierung & Rock-Logik (inkl. sus2)
 notes.forEach((note, i) => {
-    ['','m','7','maj7','5', 'sus4'].forEach(ext => {
-        // E-Shape (Grundton auf E-Saite)
-        const eShape = baseShapes['E' + (ext || '')] || baseShapes['E5'];
+    ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
+        const eShape = baseShapes['E' + (ext || '')] || (ext === 'sus2' ? baseShapes['Esus2'] : baseShapes['E5']);
         const ePattern = eShape.map(f => f === -1 ? -1 : f + i);
-        
-        // A-Shape (Grundton auf A-Saite)
-        // D# / Eb ist Index 11. 11 - 5 = 6. Bund auf der A-Saite.
         let aDist = (i >= 5) ? (i - 5) : (i + 7);
-        const aShape = baseShapes['A' + (ext || '')] || baseShapes['A5'];
+        const aShape = baseShapes['A' + (ext || '')] || (ext === 'sus2' ? baseShapes['Asus2'] : baseShapes['A5']);
         const aPattern = aShape.map(f => f === -1 ? -1 : f + aDist);
 
         const eMin = Math.min(...ePattern.filter(f => f > 0)) || 99;
         const aMin = Math.min(...aPattern.filter(f => f > 0)) || 99;
-
-        // Wählt die tiefere Lage: Für Eb ist das der 6. Bund (A-Saite) vs 11. Bund (E-Saite)
         patterns[note + ext] = (aMin < eMin) ? aPattern : ePattern;
         
-        if (ext === '') {
-            patterns[note + '5'] = (aMin < eMin) ? aPattern.map((f,idx) => idx > 3 ? -1 : f) : ePattern.map((f,idx) => idx > 3 ? -1 : f);
-        }
+        if (ext === '') patterns[note + '5'] = (aMin < eMin) ? aPattern.map((f,idx) => idx > 3 ? -1 : f) : ePattern.map((f,idx) => idx > 3 ? -1 : f);
     });
 });
-    
 
-// 2. Alias-Mapping (Hinzugefügt: Eb -> D#)
-const altNames = {
-    'A#':'Bb','Bb':'A#',
-    'C#':'Db','Db':'C#',
-    'D#':'Eb','Eb':'D#', // Hier ist Eb nun fest verankert
-    'F#':'Gb','Gb':'F#',
-    'G#':'Ab','Ab':'G#',
-    'B':'H','H':'B'
-};
-
+const altNames = {'A#':'Bb','Bb':'A#','C#':'Db','Db':'C#','D#':'Eb','Eb':'D#','F#':'Gb','Gb':'F#','G#':'Ab','Ab':'G#','B':'H','H':'B'};
 Object.keys(altNames).forEach(root => {
     const alias = altNames[root];
-    ['','m','7','maj7','5','sus4'].forEach(ext => {
+    ['','m','7','maj7','5','sus4','sus2'].forEach(ext => {
         if (patterns[root + ext]) patterns[alias + ext] = patterns[root + ext];
     });
 });
 
-// 3. Spezial-Korrekturen (Optimierte offene Griffe für die Bibliothek)
-patterns['C'] = [-1,3,2,0,1,0]; 
-patterns['D'] = [-1,-1,0,2,3,2]; 
-patterns['G'] = [3,2,0,0,0,3];
-patterns['E'] = [0,2,2,1,0,0];
-patterns['A'] = [-1,0,2,2,2,0];
-patterns['F'] = [1,3,3,2,1,1]; // Der klassische F-Dur (kleiner Barré/Open-Hybrid)
+// Spezial-Korrekturen (Open Dur Chords)
+patterns['C'] = [-1,3,2,0,1,0]; patterns['D'] = [-1,-1,0,2,3,2]; patterns['G'] = [3,2,0,0,0,3];
+patterns['E'] = [0,2,2,1,0,0]; patterns['A'] = [-1,0,2,2,2,0]; patterns['F'] = [1,3,3,2,1,1];
 
-// Moll-Akkorde werden nun nicht mehr zwangsweise offen dargestellt, 
-// sondern nutzen die Barré-Logik aus Schritt 1.
-    
-    
 function isChord(word) {
     const clean = word.replace(/[()\[\]]/g, '').trim();
-    if (!clean) return false;
-    const chordRegex = /^[a-hA-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim|5)?$/i;
-    return chordRegex.test(clean);
+    return /^[a-hA-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim|5)?$/i.test(clean);
 }
 
 function createSvg(frets) {
-    const activeFrets = frets.filter(f => f > 0);
-    const minFret = activeFrets.length > 0 ? Math.min(...activeFrets) : 0;
-    
-    // Offset-Logik: Wenn der tiefste Bund > 0 ist, zeigen wir die Lage an
-    const offset = minFret > 0 ? minFret : 0;
+    const tuningKey = document.getElementById('tuningSelect')?.value || 'standard';
+    const tuning = tuningOffsets[tuningKey];
+    const adj = frets.map((f, i) => (f <= 0) ? f : f - tuning[i]);
+    const minFret = Math.min(...adj.filter(f => f > 0)) || 0;
+    const offset = minFret > 4 ? minFret : 0;
 
     let svg = `<svg viewBox="0 0 100 120">`;
-    const nutWidth = offset === 0 ? 3 : 1;
-    svg += `<line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="${nutWidth}"/>`;
-    
+    svg += `<line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="${offset===0?3:1}"/>`;
     for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
     for(let i=0; i<5; i++) svg += `<line x1="10" y1="${20+i*20}" x2="90" y2="${20+i*20}" stroke="#ccc"/>`;
-    
-    // Markante Bundanzeige
-    if (offset > 0) {
-        svg += `<text x="92" y="38" font-size="12" font-weight="bold" fill="#0284c7">${offset}fr</text>`;
-    }
-
-    frets.forEach((f, s) => {
-        if(f === 0) {
-            svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
-        } else if(f > 0) {
-            // Finger-Position relativ zum Offset
-            const displayFret = (f - offset) + 1;
-            svg += `<circle cx="${10+s*16}" cy="${20+displayFret*20-10}" r="5" fill="black"/>`;
-        } else if(f === -1) {
-            svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
-        }
+    if (offset > 0) svg += `<text x="92" y="38" font-size="12" font-weight="bold" fill="#0284c7">${offset}fr</text>`;
+    adj.forEach((f, s) => {
+        if(f === 0) svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
+        else if(f > 0) svg += `<circle cx="${10+s*16}" cy="${20+(f-offset+1)*20-10}" r="5" fill="black"/>`;
+        else if(f === -1) svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
     });
-    
     return svg + `</svg>`;
 }
-    
 
-    
 function render() {
     const input = document.getElementById('editor').value;
+    const tuningText = document.getElementById('tuningSelect').options[document.getElementById('tuningSelect').selectedIndex].text;
+    document.getElementById('outTitle').innerText = document.getElementById('titleIn').value || 'Mein Song';
+    document.getElementById('outMeta').innerText = `Key: ${document.getElementById('keyIn').value} | Tuning: ${tuningText}`;
     const outContent = document.getElementById('outContent');
     const outChords = document.getElementById('outChords');
-    const tuningText = document.getElementById('tuningSelect').options[document.getElementById('tuningSelect').selectedIndex].text;
+    outContent.innerHTML = ''; outChords.innerHTML = '';
     const found = new Set();
-    
-    document.getElementById('outTitle').innerText = document.getElementById('titleIn').value || 'Mein Song';
-    
-    // Hier wird das Tuning in die Meta-Info geschrieben
-    document.getElementById('outMeta').innerText = `Key: ${document.getElementById('keyIn').value} | Tuning: ${tuningText}`;
-
-    outContent.innerHTML = '';
-    outChords.innerHTML = '';
-
     input.split('\n').forEach(line => {
         const lineDiv = document.createElement('div');
         lineDiv.className = 'song-line';
-        
-        const words = line.split(/(\s+)/); // Behält Leerzeichen bei
-        
-        // Prüfen ob die ganze Zeile überwiegend aus Akkorden besteht
         const onlyChords = line.trim().split(/\s+/).every(w => isChord(w));
-
-        words.forEach(word => {
+        line.split(/(\s+)/).forEach(word => {
             if (isChord(word)) {
-                let cleanChord = word.trim();
-                found.add(cleanChord);
-                lineDiv.innerHTML += `<span class="chord-wrap"><span class="chord-label">${cleanChord}</span>${onlyChords ? '&nbsp;&nbsp;&nbsp;' : word}</span>`;
-            } else {
-                lineDiv.innerHTML += `<span>${word.replace(/ /g, '&nbsp;')}</span>`;
-            }
+                let c = word.trim(); found.add(c);
+                lineDiv.innerHTML += `<span class="chord-wrap"><span class="chord-label">${c}</span>${onlyChords ? '&nbsp;&nbsp;' : word}</span>`;
+            } else lineDiv.innerHTML += `<span>${word.replace(/ /g, '&nbsp;')}</span>`;
         });
-
         outContent.appendChild(lineDiv);
     });
-
-found.forEach(c => {
-        // Verwandelt kleingeschriebene Eingaben (eb5) in korrekte Keys (Eb5)
-        let normalized = c.charAt(0).toUpperCase() + c.slice(1);
-        
-        // Prüfe, ob der Akkord in unserer Datenbank existiert
-        if(patterns[normalized]) {
-            outChords.innerHTML += `<div class="chord-item"><b>${normalized}</b><br>${createSvg(patterns[normalized])}</div>`;
-        }
+    found.forEach(c => {
+        let norm = c.charAt(0).toUpperCase() + c.slice(1);
+        if (norm[1] === 'b' || norm[1] === '#') norm = norm.charAt(0) + norm[1] + norm.slice(2);
+        if(patterns[norm]) outChords.innerHTML += `<div class="chord-item"><b>${norm}</b><br>${createSvg(patterns[norm])}</div>`;
     });
-    
+}
+
+function toggleLibrary() {
+    const lib = document.getElementById('chordLibrary');
+    if (lib.style.display === 'none') {
+        lib.style.display = 'grid'; lib.innerHTML = '';
+        const all = Object.keys(patterns).sort();
+        const pwr = all.filter(c => c.endsWith('5'));
+        const opn = ['C','D','E','F','G','A'];
+        const sus = all.filter(c => c.includes('sus2') || c.includes('sus4'));
+        const createSection = (title, list) => {
+            if(!list.length) return '';
+            let h = `<div style="grid-column: 1/-1; margin-top:20px; border-bottom:1px solid var(--primary); color:var(--primary); font-weight:bold; padding-bottom:5px; text-transform:uppercase; font-size:0.8rem;">${title}</div>`;
+            list.forEach(c => { if(patterns[c]) h += `<div class="chord-item" style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155;"><b style="color:white">${c}</b><br>${createSvg(patterns[c])}</div>`; });
+            return h;
+        };
+        lib.innerHTML += createSection('🔥 Powerchords', pwr) + createSection('🎸 Open Chords', opn) + createSection('✨ Sus-Akkorde', sus) + createSection('📚 Weitere', all.filter(c => !pwr.includes(c) && !opn.includes(c) && !sus.includes(c)));
+    } else lib.style.display = 'none';
 }
 window.onload = render;
+</script>
 function toggleLibrary() {
     const lib = document.getElementById('chordLibrary');
     if (lib.style.display === 'none') {
