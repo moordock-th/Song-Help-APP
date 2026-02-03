@@ -113,23 +113,32 @@ const baseShapes = {
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
-// 1. Mathematische Generierung & Rock-Logik (inkl. sus2)
+// 1. Mathematische Generierung (Vollständige Powerchords auf E- & A-Saite)
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
-        const eShape = baseShapes['E' + (ext || '')] || (ext === 'sus2' ? baseShapes['Esus2'] : baseShapes['E5']);
-        const ePattern = eShape.map(f => f === -1 ? -1 : f + i);
-        let aDist = (i >= 5) ? (i - 5) : (i + 7);
-        const aShape = baseShapes['A' + (ext || '')] || (ext === 'sus2' ? baseShapes['Asus2'] : baseShapes['A5']);
-        const aPattern = aShape.map(f => f === -1 ? -1 : f + aDist);
+        // Basis-Shapes holen
+        let eS = baseShapes['E' + ext] || (ext === '5' ? baseShapes['E5'] : baseShapes['E']);
+        let aS = baseShapes['A' + ext] || (ext === '5' ? baseShapes['A5'] : baseShapes['A']);
 
+        // Powerchord-Spezialfall: Immer 3 Töne erzwingen (Grundton, Quinte, Oktave)
+        if (ext === '5') {
+            eS = [0, 2, 2, -1, -1, -1]; // E-Saiten Powerchord Shape
+            aS = [-1, 0, 2, 2, -1, -1]; // A-Saiten Powerchord Shape
+        }
+
+        // Muster durch Verschiebung berechnen
+        const ePattern = eS.map(f => f === -1 ? -1 : f + i);
+        let aDist = (i >= 5) ? (i - 5) : (i + 7);
+        const aPattern = aS.map(f => f === -1 ? -1 : f + aDist);
+
+        // Die Lage wählen, die näher am Sattel liegt
         const eMin = Math.min(...ePattern.filter(f => f > 0)) || 99;
         const aMin = Math.min(...aPattern.filter(f => f > 0)) || 99;
         patterns[note + ext] = (aMin < eMin) ? aPattern : ePattern;
-        
-        if (ext === '') patterns[note + '5'] = (aMin < eMin) ? aPattern.map((f,idx) => idx > 3 ? -1 : f) : ePattern.map((f,idx) => idx > 3 ? -1 : f);
     });
 });
 
+// Alias-Namen (Bb, Eb, H etc.)
 const altNames = {'A#':'Bb','Bb':'A#','C#':'Db','Db':'C#','D#':'Eb','Eb':'D#','F#':'Gb','Gb':'F#','G#':'Ab','Ab':'G#','B':'H','H':'B'};
 Object.keys(altNames).forEach(root => {
     const alias = altNames[root];
@@ -138,7 +147,7 @@ Object.keys(altNames).forEach(root => {
     });
 });
 
-// Spezial-Korrekturen (Open Dur Chords)
+// Spezial-Korrekturen für offene Akkorde (Powerchords bleiben mathematisch!)
 patterns['C'] = [-1,3,2,0,1,0]; patterns['D'] = [-1,-1,0,2,3,2]; patterns['G'] = [3,2,0,0,0,3];
 patterns['E'] = [0,2,2,1,0,0]; patterns['A'] = [-1,0,2,2,2,0]; patterns['F'] = [1,3,3,2,1,1];
 
@@ -153,7 +162,6 @@ function createSvg(frets) {
     const adj = frets.map((f, i) => (f <= 0) ? f : f - tuning[i]);
     const minFret = Math.min(...adj.filter(f => f > 0)) || 0;
     const offset = minFret > 4 ? minFret : 0;
-
     let svg = `<svg viewBox="0 0 100 120">`;
     svg += `<line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="${offset===0?3:1}"/>`;
     for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
@@ -177,8 +185,7 @@ function render() {
     outContent.innerHTML = ''; outChords.innerHTML = '';
     const found = new Set();
     input.split('\n').forEach(line => {
-        const lineDiv = document.createElement('div');
-        lineDiv.className = 'song-line';
+        const lineDiv = document.createElement('div'); lineDiv.className = 'song-line';
         const onlyChords = line.trim().split(/\s+/).every(w => isChord(w));
         line.split(/(\s+)/).forEach(word => {
             if (isChord(word)) {
@@ -202,63 +209,17 @@ function toggleLibrary() {
         const all = Object.keys(patterns).sort();
         const pwr = all.filter(c => c.endsWith('5'));
         const opn = ['C','D','E','F','G','A'];
-        const sus = all.filter(c => c.includes('sus2') || c.includes('sus4'));
+        const rest = all.filter(c => !c.endsWith('5') && !opn.includes(c));
         const createSection = (title, list) => {
             if(!list.length) return '';
             let h = `<div style="grid-column: 1/-1; margin-top:20px; border-bottom:1px solid var(--primary); color:var(--primary); font-weight:bold; padding-bottom:5px; text-transform:uppercase; font-size:0.8rem;">${title}</div>`;
             list.forEach(c => { if(patterns[c]) h += `<div class="chord-item" style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155;"><b style="color:white">${c}</b><br>${createSvg(patterns[c])}</div>`; });
             return h;
         };
-        lib.innerHTML += createSection('🔥 Powerchords', pwr) + createSection('🎸 Open Chords', opn) + createSection('✨ Sus-Akkorde', sus) + createSection('📚 Weitere', all.filter(c => !pwr.includes(c) && !opn.includes(c) && !sus.includes(c)));
+        lib.innerHTML += createSection('🔥 Powerchords (Rock)', pwr) + createSection('🎸 Open Chords (Dur)', opn) + createSection('📚 Weitere Akkorde', rest);
     } else lib.style.display = 'none';
 }
 window.onload = render;
 </script>
-function toggleLibrary() {
-    const lib = document.getElementById('chordLibrary');
-    if (lib.style.display === 'none') {
-        lib.style.display = 'grid';
-        lib.innerHTML = ''; 
-
-        // Alle verfügbaren Akkord-Namen holen und sortieren
-        const allChords = Object.keys(patterns).sort();
-        
-        // 1. Kategorie: Powerchords (enden auf '5')
-        const powerChords = allChords.filter(c => c.endsWith('5'));
-        
-        // 2. Kategorie: Deine gewünschten Open Chords (Dur-Varianten)
-        const openChords = ['C', 'D', 'E', 'F', 'G', 'A']; 
-        
-        // 3. Kategorie: Alles andere (Moll-Barré, 7er, sus-Akkorde etc.)
-        const rest = allChords.filter(c => !c.endsWith('5') && !openChords.includes(c));
-
-        // Hilfsfunktion zum Erstellen der Sektionen
-        const createSection = (title, list) => {
-            if(list.length === 0) return '';
-            let html = `<div style="grid-column: 1/-1; margin-top: 20px; border-bottom: 1px solid var(--primary); color: var(--primary); font-weight: bold; padding-bottom: 5px; text-transform: uppercase; font-size: 0.8rem;">${title}</div>`;
-            list.forEach(chord => {
-                // Nur hinzufügen, wenn das Muster auch wirklich existiert
-                if (patterns[chord]) {
-                    html += `
-                        <div class="chord-item" style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155;">
-                            <b style="color: white; font-size: 14px;">${chord}</b><br>
-                            ${createSvg(patterns[chord])}
-                        </div>`;
-                }
-            });
-            return html;
-        };
-
-        // Die Sektionen in der gewünschten Reihenfolge zusammenbauen
-        lib.innerHTML += createSection('🔥 Powerchords (Rock)', powerChords);
-        lib.innerHTML += createSection('🎸 Open Chords (Dur)', openChords);
-        lib.innerHTML += createSection('📚 Weitere Akkorde (Barré & Co.)', rest);
-        
-    } else {
-        lib.style.display = 'none';
-    }
-
-
-}</script>
 </body>
-</html>      
+</html>     
