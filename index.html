@@ -153,32 +153,28 @@ function createSvg(frets) {
     const activeFrets = frets.filter(f => f > 0);
     const minFret = activeFrets.length > 0 ? Math.min(...activeFrets) : 0;
     
-    // Wenn der Akkord höher als Bund 4 ist, setzen wir den Offset 
-    // direkt auf den tiefsten gedrückten Bund
-    const offset = minFret > 4 ? minFret : 0;
+    // Offset-Logik: Wenn der tiefste Bund > 0 ist, zeigen wir die Lage an
+    const offset = minFret > 0 ? minFret : 0;
 
     let svg = `<svg viewBox="0 0 100 120">`;
-    
     const nutWidth = offset === 0 ? 3 : 1;
     svg += `<line x1="10" y1="20" x2="90" y2="20" stroke="black" stroke-width="${nutWidth}"/>`;
     
     for(let i=0; i<6; i++) svg += `<line x1="${10+i*16}" y1="20" x2="${10+i*16}" y2="100" stroke="#ccc"/>`;
     for(let i=0; i<5; i++) svg += `<line x1="10" y1="${20+i*20}" x2="90" y2="${20+i*20}" stroke="#ccc"/>`;
     
-    // Zeige die Bundzahl direkt am ersten Finger an
+    // Markante Bundanzeige
     if (offset > 0) {
-        svg += `<text x="92" y="38" font-size="12" font-weight="bold" fill="red">${offset}fr</text>`;
+        svg += `<text x="92" y="38" font-size="12" font-weight="bold" fill="#0284c7">${offset}fr</text>`;
     }
 
     frets.forEach((f, s) => {
         if(f === 0) {
             svg += `<circle cx="${10+s*16}" cy="10" r="4" fill="none" stroke="green"/>`;
         } else if(f > 0) {
-            // Die Position wird nun so berechnet, dass der Offset-Bund ganz oben ist
-            const displayFret = (f === offset) ? 1 : (f - offset + 1);
-            if (displayFret >= 1 && displayFret <= 5) {
-                svg += `<circle cx="${10+s*16}" cy="${20+displayFret*20-10}" r="5" fill="black"/>`;
-            }
+            // Finger-Position relativ zum Offset
+            const displayFret = (f - offset) + 1;
+            svg += `<circle cx="${10+s*16}" cy="${20+displayFret*20-10}" r="5" fill="black"/>`;
         } else if(f === -1) {
             svg += `<text x="${6+s*16}" y="12" font-size="12" fill="red">×</text>`;
         }
@@ -186,6 +182,7 @@ function createSvg(frets) {
     
     return svg + `</svg>`;
 }
+    
 
     
 function render() {
