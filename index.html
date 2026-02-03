@@ -111,7 +111,7 @@ const baseShapes = {
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
-// 1. Mathematische Generierung mit verbesserter Saiten-Logik
+// 1. Mathematische Generierung mit korrigierter Saiten-Logik & Syntax
 notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
         let eS = baseShapes['E' + ext] || baseShapes['E'];
@@ -122,23 +122,20 @@ notes.forEach((note, i) => {
             aS = [-1, 0, 2, 2, -1, -1];
         }
 
-        // Berechnung der beiden Varianten
         const ePattern = eS.map(f => f === -1 ? -1 : f + i);
         let aDist = (i >= 5) ? (i - 5) : (i + 7);
         const aPattern = aS.map(f => f === -1 ? -1 : f + aDist);
 
-        // STRENGE LOGIK: 
-        // Noten E, F, F#, G, G# -> Immer E-Saiten Shape (0. bis 4. Bund)
-        // Noten Bb, B, C, C#, D, D# -> Immer A-Saiten Shape (1. bis 6. Bund)
+        // STRENGE LOGIK FÜR POSITIONIERUNG:
+        // E (0), F (1), F# (2), G (3), G# (4) -> Immer E-Saiten Shape
+        // A (5) bis D# (11) -> Immer A-Saiten Shape
         if (i <= 4) {
-            patterns[note + ext] = ePattern; // E-Saite bevorzugt für tiefe Töne
-        } else if (i >= 5 && i <= 10) {
-            patterns[note + ext] = aPattern; // A-Saite bevorzugt für mittlere Töne
+            patterns[note + ext] = ePattern; 
         } else {
-            patterns[note + ext] = ePattern; // Zurück zur E-Saite für hohe Töne (D# etc.)
+            patterns[note + ext] = aPattern;
         }
-    })
-
+    });
+}); // Diese Klammer hat in deinem Code gefehlt!
 
 // Alias-Namen (Bb, Eb, H etc.)
 const altNames = {'A#':'Bb','Bb':'A#','C#':'Db','Db':'C#','D#':'Eb','Eb':'D#','F#':'Gb','Gb':'F#','G#':'Ab','Ab':'G#','B':'H','H':'B'};
@@ -149,7 +146,7 @@ Object.keys(altNames).forEach(root => {
     });
 });
 
-// Spezial-Korrekturen für offene Dur-Akkorde
+// Spezial-Korrekturen für offene Dur-Akkorde (F und G auf E-Saite fixiert)
 patterns['C'] = [-1,3,2,0,1,0]; patterns['D'] = [-1,-1,0,2,3,2]; patterns['G'] = [3,2,0,0,0,3];
 patterns['E'] = [0,2,2,1,0,0]; patterns['A'] = [-1,0,2,2,2,0]; patterns['F'] = [1,3,3,2,1,1];
 
@@ -199,7 +196,7 @@ function render() {
     });
     found.forEach(c => {
         let norm = c.charAt(0).toUpperCase() + c.slice(1);
-        if (norm[1] === 'b' || norm[1] === '#') norm = norm.charAt(0) + norm[1] + norm.slice(2);
+        if (norm[1] === 'b' || norm[1] === '#') norm = norm.charAt(0) + norm[1] + norm[1] === '#' ? '#' : 'b' + norm.slice(2);
         if(patterns[norm]) outChords.innerHTML += `<div class="chord-item"><b>${norm}</b><br>${createSvg(patterns[norm])}</div>`;
     });
 }
