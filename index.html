@@ -46,17 +46,27 @@
 <body>
 
 <div class="container">
-    <div class="header-ui no-print">
-        <div class="input-group">
-            <label>Song Titel</label>
-            <input type="text" id="titleIn" placeholder="z.B. Wonderwall" oninput="render()">
-        </div>
-        <div class="input-group">
-            <label>Tonart</label>
-            <input type="text" id="keyIn" placeholder="z.B. G-Dur" oninput="render()">
-        </div>
-        <button class="btn" onclick="window.print()">🖨️ PDF / DRUCKEN</button>
+<div class="header-ui no-print">
+    <div class="input-group">
+        <label>Song Titel</label>
+        <input type="text" id="titleIn" placeholder="z.B. Wonderwall" oninput="render()">
     </div>
+    <div class="input-group">
+        <label>Tonart</label>
+        <input type="text" id="keyIn" placeholder="z.B. G-Dur" oninput="render()">
+    </div>
+    
+    <div class="input-group">
+        <label>Gitarren-Tuning</label>
+        <select id="tuningSelect" onchange="render()">
+            <option value="standard">Standard (E A D G B E)</option>
+            <option value="eb">Eb Tuning (Halbton tiefer)</option>
+            <option value="dropD">Drop D (D A D G B E)</option>
+        </select>
+    </div>
+    <button class="btn" onclick="window.print()">🖨️ PDF / DRUCKEN</button>
+</div>
+    
 
     <div class="app-grid">
         <div class="no-print">
@@ -81,6 +91,13 @@
 </div>
 
 <script>
+    // HIER EINFÜGEN
+const tuningOffsets = {
+    'standard': [0, 0, 0, 0, 0, 0],
+    'eb': [-1, -1, -1, -1, -1, -1],
+    'dropD': [-2, 0, 0, 0, 0, 0]
+};
+    
 const baseShapes = {
     'E': [0,2,2,1,0,0], 'Em': [0,2,2,0,0,0], 'E7': [0,2,0,1,0,0], 'Emaj7': [0,2,1,1,0,0], 'E5': [0,2,2,-1,-1,-1], 'Esus4': [0,2,2,2,0,0],
     'A': [-1,0,2,2,2,0], 'Am': [-1,0,2,2,1,0], 'A7': [-1,0,2,0,2,0], 'Amaj7': [-1,0,2,1,2,0], 'A5': [-1,0,2,2,-1,-1], 'Asus2': [-1,0,2,2,0,0], 'Asus4': [-1,0,2,2,3,0], 'Aadd9': [-1,0,2,4,2,0]
