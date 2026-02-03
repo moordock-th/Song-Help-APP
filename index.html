@@ -90,43 +90,45 @@ const baseShapes = {
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const patterns = {};
 
-// 1. Mathematische Generierung
+// 1. Mathematische Generierung & Rock-Logik
 notes.forEach((note, i) => {
-    ['','m','7','maj7','5','sus4'].forEach(ext => {
-        // E-Shape Berechnung
+    ['','m','7','maj7','5', 'sus4'].forEach(ext => {
         const eShape = baseShapes['E' + (ext || '')] || baseShapes['E5'];
         const ePattern = eShape.map(f => f === -1 ? -1 : f + i);
         
-        // A-Shape Berechnung
         let aDist = (i >= 5) ? (i - 5) : (i + 7);
         const aShape = baseShapes['A' + (ext || '')] || baseShapes['A5'];
         const aPattern = aShape.map(f => f === -1 ? -1 : f + aDist);
 
-        const eMin = Math.min(...ePattern.filter(f => f > 0));
-        const aMin = Math.min(...aPattern.filter(f => f > 0));
+        const eMin = Math.min(...ePattern.filter(f => f > 0)) || 99;
+        const aMin = Math.min(...aPattern.filter(f => f > 0)) || 99;
 
-        // Speichere die ergonomischere Variante
         patterns[note + ext] = (aMin < eMin) ? aPattern : ePattern;
         
-        // Automatischer Powerchord-Eintrag für jeden Grundton
         if (ext === '') {
             patterns[note + '5'] = (aMin < eMin) ? aPattern.map((f,idx) => idx > 3 ? -1 : f) : ePattern.map((f,idx) => idx > 3 ? -1 : f);
         }
     });
 });
 
-// 2. Alias-Mapping (# und b)
-const altNames = {'A#':'Bb','Bb':'A#','C#':'Db','Db':'C#','D#':'Eb','Eb':'D#','F#':'Gb','Gb':'F#','G#':'Ab','Ab':'G#','B':'H','H':'B'};
-Object.keys(patterns).forEach(name => {
-    const rootMatch = name.match(/^([A-G][#b]?)/);
-    if(rootMatch) {
-        const root = rootMatch[1];
-        const ext = name.replace(root, '');
-        if (altNames[root]) patterns[altNames[root] + ext] = patterns[name];
-    }
+// 2. Alias-Mapping (Hinzugefügt: Eb -> D#)
+const altNames = {
+    'A#':'Bb','Bb':'A#',
+    'C#':'Db','Db':'C#',
+    'D#':'Eb','Eb':'D#', // Hier ist Eb nun fest verankert
+    'F#':'Gb','Gb':'F#',
+    'G#':'Ab','Ab':'G#',
+    'B':'H','H':'B'
+};
+
+Object.keys(altNames).forEach(root => {
+    const alias = altNames[root];
+    ['','m','7','maj7','5','sus4'].forEach(ext => {
+        if (patterns[root + ext]) patterns[alias + ext] = patterns[root + ext];
+    });
 });
 
-// 3. Priorisierte Korrekturen
+// 3. Spezial-Korrekturen
 patterns['C'] = [-1,3,2,0,1,0]; patterns['D'] = [-1,-1,0,2,3,2]; patterns['G'] = [3,2,0,0,0,3];
 patterns['Dm'] = [-1,-1,0,2,3,1]; patterns['Am'] = [-1,0,2,2,1,0]; patterns['Em'] = [0,2,2,0,0,0];
     
