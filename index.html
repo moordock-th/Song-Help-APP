@@ -96,7 +96,6 @@
 
 <script>
 // --- KONFIGURATION & DATEN ---
-// Basis-Noten (0=E, 1=F, 2=F#, 3=G, 4=G#, 5=A, 6=A#, 7=B, 8=C...)
 const notes = ['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 const altNames = {'Bb':'A#', 'Db':'C#', 'Eb':'D#', 'Gb':'F#', 'Ab':'G#', 'H':'B'};
 const tuningOffsets = { 'standard': [0,0,0,0,0,0], 'eb': [-1,-1,-1,-1,-1,-1], 'dropD': [-2,0,0,0,0,0] };
@@ -113,21 +112,18 @@ notes.forEach((note, i) => {
     ['','m','7','maj7','5', 'sus4', 'sus2'].forEach(ext => {
         let pattern;
         if (ext === '5') {
-            // POWERCHORD LOGIK (Korrigiert für F#5 = 2. Bund)
-            if (i <= 4) { 
-                // E-Saiten-Form (E bis G#)
-                // i ist exakt der Bund auf der E-Saite. 
-                // E=0, F=1, F#=2, G=3, G#=4
+            // KORRIGIERTE POWERCHORD LOGIK (Grundton + Quinte)
+            // Bevorzugt tiefe Saiten für Powerchords
+            if (i <= 7) { 
+                // E-Saiten-Form (E5 bis B5)
                 pattern = [i, i + 2, i + 2, -1, -1, -1];
             } else { 
-                // A-Saiten-Form (A bis D#)
-                // A ist Index 5. Auf der A-Saite ist das Bund 0 (leer).
-                // A# ist Index 6. 6-5 = Bund 1.
+                // A-Saiten-Form (C5 bis D#5) -> Index relativ zur A-Saite (A=5)
                 let aFret = i - 5;
                 pattern = [-1, aFret, aFret + 2, aFret + 2, -1, -1];
             }
         } else {
-            // Barree-Logik
+            // Barree-Logik für Standard-Akkorde
             let shape = baseShapes[ext] || baseShapes[''];
             if (i <= 4) { // E-Form
                 pattern = shape.map(f => f === -1 ? -1 : f + i);
@@ -141,7 +137,7 @@ notes.forEach((note, i) => {
     });
 });
 
-// Aliasse (H -> B, Bb -> A#)
+// Aliasse hinzufügen (H -> B, Bb -> A#)
 Object.keys(altNames).forEach(alt => {
     const orig = altNames[alt];
     ['','m','7','maj7','5','sus4','sus2'].forEach(ext => {
@@ -163,7 +159,6 @@ patterns['Dm'] = [-1,-1,0,2,3,1];
 // --- HILFSFUNKTIONEN ---
 function isChord(word) {
     const clean = word.replace(/[()\[\]]/g, '').trim();
-    // Regex prüft auf gängige Akkordformate
     return /^[a-hA-H][b#]?(m|maj|min|maj7|7|sus2|sus4|add9|dim|5)?$/i.test(clean);
 }
 
@@ -191,7 +186,8 @@ function createSvg(frets) {
     adj.forEach((f, s) => {
         if(f === 0) svg += `<circle cx="${10+s*16}" cy="12" r="4" fill="none" stroke="green" stroke-width="1.5"/>`;
         else if(f > 0) {
-            let relF = f - offset + 1;
+            // FIX: Nur +1 addieren, wenn Offset aktiv ist. Sonst ist f absolut.
+            let relF = (offset > 0) ? f - offset + 1 : f;
             svg += `<circle cx="${10+s*16}" cy="${20+(relF*20)-10}" r="6" fill="#1e293b"/>`;
         }
         else if(f === -1) svg += `<text x="${6+s*16}" y="14" font-size="14" fill="red">×</text>`;
@@ -201,5 +197,67 @@ function createSvg(frets) {
 
 function render() {
     const input = document.getElementById('editor').value;
-    const tuningSelect = document.getElementById('tuningSelect');
-    const tuningText = tuningSelect
+    const tuningText = document.getElementById('tuningSelect').options[document.getElementById('tuningSelect').selectedIndex].text;
+    document.getElementById('outTitle').innerText = document.getElementById('titleIn').value || 'Mein Song';
+    document.getElementById('outMeta').innerText = `Key: ${document.getElementById('keyIn').value || '-'} | Tuning: ${tuningText}`;
+    
+    const outContent = document.getElementById('outContent');
+    const outChords = document.getElementById('outChords');
+    outContent.innerHTML = ''; outChords.innerHTML = '';
+    
+    const found = new Set();
+    input.split('\n').forEach(line => {
+        const lineDiv = document.createElement('div'); lineDiv.className = 'song-line';
+        const onlyChords = line.trim().split(/\s+/).every(w => isChord(w));
+        
+        line.split(/(\s+)/).forEach(word => {
+            if (isChord(word)) {
+                let c = word.trim();
+                let norm = c.charAt(0).toUpperCase() + c.slice(1);
+                found.add(norm);
+                lineDiv.innerHTML += `<span class="chord-wrap"><span class="chord-label">${c}</span>${onlyChords ? '&nbsp;&nbsp;&nbsp;' : word}</span>`;
+            } else {
+                lineDiv.innerHTML += `<span>${word.replace(/ /g, '&nbsp;')}</span>`;
+            }
+        });
+        outContent.appendChild(lineDiv);
+    });
+
+    found.forEach(c => {
+        if(patterns[c]) outChords.innerHTML += `<div class="chord-item"><b>${c}</b><br>${createSvg(patterns[c])}</div>`;
+    });
+}
+
+function toggleLibrary() {
+    const lib = document.getElementById('chordLibrary');
+    if (lib.style.display === 'none') {
+        lib.style.display = 'grid'; lib.innerHTML = '';
+        const all = Object.keys(patterns).sort();
+        
+        const createSection = (title, list) => {
+            if(!list.length) return '';
+            let h = `<div style="grid-column: 1/-1; margin-top:20px; border-bottom:1px solid var(--primary); color:var(--primary); font-weight:bold; padding-bottom:5px; text-transform:uppercase; font-size:0.8rem;">${title}</div>`;
+            list.forEach(c => { 
+                h += `<div class="chord-item" style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155;">
+                    <b style="color:white">${c}</b><br>${createSvg(patterns[c])}
+                </div>`; 
+            });
+            return h;
+        };
+
+        const power = all.filter(c => c.endsWith('5'));
+        const basics = ['C','D','E','F','G','A','Am','Em','Dm'];
+        const others = all.filter(c => !power.includes(c) && !basics.includes(c));
+
+        lib.innerHTML += createSection('🔥 Powerchords', power) + 
+                         createSection('🎸 Basics', basics) + 
+                         createSection('📚 Alle anderen', others);
+    } else {
+        lib.style.display = 'none';
+    }
+}
+
+window.onload = render;
+</script>
+</body>
+</html>
