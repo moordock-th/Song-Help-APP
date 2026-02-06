@@ -1,6 +1,6 @@
-# 🎸 Song-Help - Mobile App
+# 🎸 ChordWanze - Mobile App
 
-Superwanze Web App (PWA) für Gitarristen zum Anzeigen von Song-Lyrics mit Akkorden. 
+ChordWanze Web App (PWA) für Gitarristen zum Anzeigen von Song-Lyrics mit Akkorden. 
 
 ## ✨ Neue Features
 
@@ -282,18 +282,5 @@ Verbesserungsvorschläge? Features gewünscht?
 
 Dieses Projekt steht unter der MIT-Lizenz - siehe LICENSE-Datei für Details.
 
-## 🙏 Danksagung
-
-- Inspiration von Chord-Apps wie Ultimate Guitar
-- PWA-Best-Practices von Google Web.dev
-- Icon-Design-Tipps von Material Design
-
-## 📧 Support
-
-Bei Fragen oder Problemen:
-- Erstelle ein Issue auf GitHub
-- Oder kontaktiere mich direkt
-
----
 
 **Viel Spaß beim Musizieren! 🎸🎵**
